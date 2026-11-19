@@ -26,24 +26,29 @@ class CimaNowProvider : MainAPI() {
         "User-Agent" to "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/126.0.0.0 Safari/537.36"
     )
 
+    private fun parseCleanDoc(html: String, baseUrl: String): Document {
+        if (html.contains("String.fromCharCode") && html.contains("atob(")) {
+            val decoded = decodeCimaNow(html)
+            if (decoded.isNotBlank()) {
+                return Jsoup.parse(decoded, baseUrl)
+            }
+        }
+        return Jsoup.parse(html, baseUrl)
+    }
+
     private suspend fun getCleanDoc(url: String, referer: String = "$mainUrl/"): Document {
         val response = app.get(
             url,
             headers = requestHeaders + ("Referer" to referer)
         )
-        val html = response.text
-        if (html.contains("String.fromCharCode") && html.contains("atob(")) {
-            val decoded = decodeCimaNow(html)
-            if (decoded.isNotBlank()) {
-                return Jsoup.parse(decoded, url)
-            }
-        }
-        return response.document
+        return parseCleanDoc(response.text, url)
     }
 
     private fun decodeCimaNow(html: String): String {
         return try {
-            val offsetMatch = Regex("""-\s*(\d+)\s*\)""").find(html) ?: return ""
+            val offsetMatch = Regex("""replace\(/\\D/g,\s*['"]['"]\)\)\s*-\s*(\d+)""").find(html)
+                ?: Regex("""-\s*(\d{4,})\s*\)""").find(html)
+                ?: return ""
             val offset = offsetMatch.groupValues[1].toIntOrNull() ?: return ""
             val arrayMatch = Regex("""\[\s*"([^"]+)"(?:\s*,\s*"[^"]+")*\s*]""").find(html) ?: return ""
             val chunks = Regex(""""([^"]+)"""").findAll(arrayMatch.value).map { it.groupValues[1] }.toList()
@@ -147,11 +152,7 @@ class CimaNowProvider : MainAPI() {
             }
         }
 
-        val watchAnchor: Element? = document.selectFirst("a[href*=/watching/]")
-        val watchUrl = watchAnchor?.attr("href")?.ifEmpty { "${url.trimEnd('/')}/watching/" }
-            ?: "${url.trimEnd('/')}/watching/"
-
-        return newMovieLoadResponse(title, url, TvType.Movie, watchUrl) {
+        return newMovieLoadResponse(title, url, TvType.Movie, url) {
             this.posterUrl = poster
             this.plot = plot
         }
@@ -163,17 +164,31 @@ class CimaNowProvider : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val watchUrl = if (data.contains("/watching/")) {
-            data
+        val pageRes = app.get(
+            data,
+            headers = requestHeaders + ("Referer" to "$mainUrl/")
+        )
+        val pageCookies = pageRes.cookies
+        val pageDoc = parseCleanDoc(pageRes.text, data)
+
+        val watchAnchor: Element? = pageDoc.selectFirst("a[href*=/watching/], li[aria-label=watch] a")
+        val rawWatchHref: String? = watchAnchor?.attr("href")
+        val watchUrl = if (!rawWatchHref.isNullOrBlank()) {
+            fixUrl(rawWatchHref)
         } else {
-            val epDoc = getCleanDoc(data)
-            val watchAnchor: Element? = epDoc.selectFirst("a[href*=/watching/]")
-            watchAnchor?.attr("href")?.ifEmpty { "${data.trimEnd('/')}/watching/" }
-                ?: "${data.trimEnd('/')}/watching/"
+            "${data.trimEnd('/')}/watching/"
         }
 
-        val document = getCleanDoc(watchUrl, referer = data)
+        val watchRes = app.get(
+            watchUrl,
+            headers = requestHeaders + ("Referer" to data),
+            cookies = pageCookies
+        )
+        val allCookies = pageCookies + watchRes.cookies
+        val document = parseCleanDoc(watchRes.text, watchUrl)
+
         val embedUrls = mutableListOf<String>()
+        val directLinks = mutableListOf<Triple<String, String, ExtractorLinkType>>()
 
         val activeIframe: Element? = document.selectFirst("li[aria-label=embed] iframe")
         val activeSrc = activeIframe?.attr("src")
@@ -181,42 +196,64 @@ class CimaNowProvider : MainAPI() {
             embedUrls.add(fixUrl(activeSrc))
         }
 
+        document.select("li[aria-label=embed] source[src], video source[src]").forEach { srcEl: Element ->
+            val vUrl = srcEl.attr("src")
+            val size = srcEl.attr("size").ifEmpty { "HD" }
+            if (vUrl.startsWith("http")) {
+                val type = if (vUrl.contains(".m3u8", ignoreCase = true)) {
+                    ExtractorLinkType.M3U8
+                } else {
+                    ExtractorLinkType.VIDEO
+                }
+                directLinks.add(Triple("CimaNow $size", vUrl, type))
+            }
+        }
+
         val serverItems = document.select("ul#watch li[data-id][data-index]")
         serverItems.amap { item: Element ->
             val dataId = item.attr("data-id")
             val dataIndex = item.attr("data-index")
             if (dataId.isNotBlank() && dataIndex.isNotBlank()) {
-                val endpoints = listOf(
-                    "$mainUrl/wp-content/themes/Cima%20Now%20New/core/?action=switch&index=$dataIndex&id=$dataId",
-                    "$mainUrl/wp-admin/admin-ajax.php?action=switch&index=$dataIndex&id=$dataId"
-                )
-                for (endpoint in endpoints) {
-                    try {
-                        val resDoc = app.get(
-                            endpoint,
-                            headers = requestHeaders + mapOf(
-                                "X-Requested-With" to "XMLHttpRequest",
-                                "Referer" to watchUrl
-                            )
-                        ).document
-                        val iframeEl: Element? = resDoc.selectFirst("iframe")
-                        val src = iframeEl?.attr("src")
-                        if (!src.isNullOrBlank()) {
-                            synchronized(embedUrls) {
-                                embedUrls.add(fixUrl(src))
-                            }
-                            break
+                try {
+                    val res = app.post(
+                        "$mainUrl/wp-content/themes/Cima%20Now%20New/core.php?action=switch&index=$dataIndex&id=$dataId",
+                        headers = requestHeaders + mapOf(
+                            "X-Requested-With" to "XMLHttpRequest",
+                            "Origin" to mainUrl,
+                            "Referer" to watchUrl
+                        ),
+                        cookies = allCookies
+                    )
+                    val resDoc = parseCleanDoc(res.text, watchUrl)
+                    val iframeEl: Element? = resDoc.selectFirst("iframe")
+                    val src = iframeEl?.attr("src")
+                    if (!src.isNullOrBlank()) {
+                        synchronized(embedUrls) {
+                            embedUrls.add(fixUrl(src))
                         }
-                    } catch (_: Exception) {
                     }
+                    resDoc.select("source[src]").forEach { srcEl: Element ->
+                        val vUrl = srcEl.attr("src")
+                        val size = srcEl.attr("size").ifEmpty { "HD" }
+                        if (vUrl.startsWith("http")) {
+                            val type = if (vUrl.contains(".m3u8", ignoreCase = true)) {
+                                ExtractorLinkType.M3U8
+                            } else {
+                                ExtractorLinkType.VIDEO
+                            }
+                            synchronized(directLinks) {
+                                directLinks.add(Triple("CimaNow $size", vUrl, type))
+                            }
+                        }
+                    }
+                } catch (_: Exception) {
                 }
             }
         }
 
-        val downloadLinks = document.select("ul#download a[href]")
-        downloadLinks.amap { el: Element ->
+        document.select("ul#download a[href]").forEach { el: Element ->
             val href = el.attr("href")
-            val label = el.text().trim().ifEmpty { "CimaNow Direct" }
+            val label = el.text().trim().ifEmpty { "Direct" }
             if (href.startsWith("http")) {
                 if (href.contains(".mp4", ignoreCase = true) || href.contains(".m3u8", ignoreCase = true)) {
                     val type = if (href.contains(".m3u8", ignoreCase = true)) {
@@ -224,28 +261,63 @@ class CimaNowProvider : MainAPI() {
                     } else {
                         ExtractorLinkType.VIDEO
                     }
-                    callback.invoke(
-                        newExtractorLink(
-                            name,
-                            "CimaNow $label",
-                            href,
-                            type
-                        ) {
-                            this.referer = watchUrl
-                            this.quality = getQualityFromName(label)
-                        }
-                    )
+                    directLinks.add(Triple("CimaNow $label", href, type))
                 } else if (!href.contains(mainUrl)) {
-                    synchronized(embedUrls) {
-                        embedUrls.add(href)
-                    }
+                    embedUrls.add(href)
                 }
             }
         }
 
+        directLinks.distinctBy { it.second }.forEach { (label, vUrl, type) ->
+            callback.invoke(
+                newExtractorLink(
+                    name,
+                    label,
+                    vUrl,
+                    type
+                ) {
+                    this.referer = watchUrl
+                    this.quality = getQualityFromName(label)
+                }
+            )
+        }
+
         embedUrls.distinct().amap { embedUrl ->
             try {
-                loadExtractor(embedUrl, watchUrl, subtitleCallback, callback)
+                val found = loadExtractor(embedUrl, watchUrl, subtitleCallback, callback)
+                if (!found) {
+                    val embedHtml = app.get(embedUrl, headers = requestHeaders + ("Referer" to watchUrl)).text
+                    val unpacked = if (embedHtml.contains("eval(function(p,a,c,k,e,d)")) {
+                        getAndUnpack(embedHtml)
+                    } else {
+                        embedHtml
+                    }
+                    val matches = Regex("""file\s*:\s*["'](https?://[^"']+\.(?:m3u8|mp4)[^"']*)["']""")
+                        .findAll(unpacked)
+                    for (match in matches) {
+                        val streamUrl = match.groupValues[1]
+                        if (streamUrl.isNotBlank()) {
+                            val type = if (streamUrl.contains(".m3u8", ignoreCase = true)) {
+                                ExtractorLinkType.M3U8
+                            } else {
+                                ExtractorLinkType.VIDEO
+                            }
+                            val hostName = Regex("""https?://(?:www\.)?([^/]+)""")
+                                .find(embedUrl)?.groupValues?.get(1) ?: "Server"
+                            callback.invoke(
+                                newExtractorLink(
+                                    name,
+                                    hostName,
+                                    streamUrl,
+                                    type
+                                ) {
+                                    this.referer = embedUrl
+                                    this.quality = Qualities.Unknown.value
+                                }
+                            )
+                        }
+                    }
+                }
             } catch (_: Exception) {
             }
         }
