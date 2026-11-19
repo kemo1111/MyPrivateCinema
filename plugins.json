@@ -1,0 +1,23 @@
+[
+    {
+        "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Korduene_Logo.png",
+        "fileHash": "sha256-f213df12e09a4a83980181dc156b752ca32620264b54afb932ef6cc2e9092cbe",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/kemo1111/MyPrivateCinema",
+        "fileSize": 39247,
+        "status": 1,
+        "language": "en",
+        "authors": [
+            "Cloudburst",
+            "Luna712"
+        ],
+        "tvTypes": [
+            "Movie"
+        ],
+        "version": 1,
+        "internalName": "ExampleProvider",
+        "description": "Lorem ipsum",
+        "url": "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/builds/ExampleProvider.cs3",
+        "name": "ExampleProvider"
+    }
+]
