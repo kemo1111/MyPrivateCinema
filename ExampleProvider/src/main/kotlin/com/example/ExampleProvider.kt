@@ -17,17 +17,17 @@ class ExampleProvider : MainAPI() {
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val document = app.get(request.data).document
-        val home = document.select("div.Block--Item").mapNotNull {
-            it.toSearchResult()
+        val home = document.select("div.Block--Item").mapNotNull { item: Element ->
+            item.toSearchResult()
         }
         return newHomePageResponse(request.name, home)
     }
 
     private fun Element.toSearchResult(): SearchResponse? {
-        val aTag = this.selectFirst("a") ?: return null
+        val aTag: Element = this.selectFirst("a") ?: return null
         val title = aTag.attr("title").ifEmpty { aTag.text() }
         val href = aTag.attr("href")
-        val img = this.selectFirst("img")
+        val img: Element? = this.selectFirst("img")
         val posterUrl = img?.attr("data-src")?.ifEmpty { img.attr("src") }
 
         return newMovieSearchResponse(title, href, TvType.Movie) {
@@ -38,8 +38,8 @@ class ExampleProvider : MainAPI() {
     override suspend fun search(query: String): List<SearchResponse> {
         val url = "$mainUrl/?s=$query"
         val document = app.get(url).document
-        return document.select("div.Block--Item").mapNotNull {
-            it.toSearchResult()
+        return document.select("div.Block--Item").mapNotNull { item: Element ->
+            item.toSearchResult()
         }
     }
 
@@ -48,10 +48,9 @@ class ExampleProvider : MainAPI() {
         val title = document.selectFirst("h1.post-title")?.text()
             ?: document.selectFirst("meta[property=og:title]")?.attr("content")
             ?: "فيلم"
-        val poster = document.selectFirst("meta[property=og:image]")?.attr("content")
-            ?: document.selectFirst("div.Poster--Block img")?.let {
-                it.attr("data-src").ifEmpty { it.attr("src") }
-            }
+        val posterImg: Element? = document.selectFirst("div.Poster--Block img")
+        val poster = document.selectFirst("meta[property=og:image]")?.attr("content")?.ifEmpty { null }
+            ?: posterImg?.attr("data-src")?.ifEmpty { posterImg.attr("src") }
         val plot = document.selectFirst("div.story p")?.text()
             ?: document.selectFirst("meta[property=og:description]")?.attr("content")
 
@@ -71,12 +70,13 @@ class ExampleProvider : MainAPI() {
         val document = app.get(watchUrl).document
         val iframeUrls = mutableListOf<String>()
 
-        document.selectFirst("div.player--iframe iframe")?.attr("src")?.let {
-            if (it.isNotBlank()) iframeUrls.add(it)
+        val directIframe: String? = document.selectFirst("div.player--iframe iframe")?.attr("src")
+        if (!directIframe.isNullOrBlank()) {
+            iframeUrls.add(directIframe)
         }
 
         val serverItems = document.select("li.server--item")
-        serverItems.amap { item ->
+        serverItems.amap { item: Element ->
             val dataId = item.attr("data-id")
             val serverNum = item.attr("data-server")
             if (dataId.isNotBlank() && serverNum.isNotBlank()) {
@@ -92,7 +92,7 @@ class ExampleProvider : MainAPI() {
                             "i" to serverNum
                         )
                     ).document
-                    val src = res.selectFirst("iframe")?.attr("src")
+                    val src: String? = res.selectFirst("iframe")?.attr("src")
                     if (!src.isNullOrBlank()) {
                         synchronized(iframeUrls) {
                             iframeUrls.add(src)
