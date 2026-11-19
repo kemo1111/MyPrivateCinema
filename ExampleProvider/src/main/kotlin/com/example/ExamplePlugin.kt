@@ -14,6 +14,8 @@ class ExamplePlugin: Plugin() {
 
         // All providers should be added in this manner
         registerMainAPI(ExampleProvider())
+        registerMainAPI(CimaNowProvider())
+
 
         openSettings = {
             val frag = BlankFragment(this)
