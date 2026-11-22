@@ -1,9 +1,9 @@
 [
   {
-    "fileHash": "sha256-571e8cb09300e9a580bf49830a61f6be3ee4357b704b24a303a607da2d4bff5b",
+    "fileHash": "sha256-32305131e75b4c89ab4f2012fab3a85323aaa278344e9ca32404c9bcd71c7e43",
     "apiVersion": 1,
     "repositoryUrl": "https://github.com/kemo1111/MyPrivateCinema",
-    "fileSize": 19483,
+    "fileSize": 21628,
     "status": 2,
     "language": "ar",
     "authors": [
@@ -12,7 +12,7 @@
     "tvTypes": [
       "Movie"
     ],
-    "version": 1,
+    "version": 2,
     "internalName": "CimaNowBrowserTest",
     "description": "اختبار متصفح سيما ناو، تحقق يدوي وتشغيل تجريبي. ليس مصدراً مكتمل القوائم. لا يغيّر ExampleProvider.",
     "url": "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/cimanow-test-builds/CimaNowBrowserTest.cs3",

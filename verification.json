@@ -1,22 +1,101 @@
 {
-  "built_at_utc": "2026-11-22T18:57:52.296786+00:00",
-  "gradle_build": "success",
-  "signature_unit_tests": 5,
-  "failures": 0,
-  "dex_classes": 29,
-  "required_classes_present": true,
+  "version": 2,
+  "source_branch": "cimanow-browser-test",
+  "source_commit": "6ee5b4ceebf2f4f85ada3efbae978f3d91d20131",
+  "artifact_branch": "cimanow-test-builds",
+  "artifact_bytes": 21628,
+  "artifact_sha256": "32305131e75b4c89ab4f2012fab3a85323aaa278344e9ca32404c9bcd71c7e43",
   "manifest": {
     "requiresResources": false,
-    "version": 1,
+    "version": 2,
     "pluginClassName": "com.kemo.cimanowtest.CimaNowBrowserTestPlugin",
     "name": "CimaNowBrowserTest"
   },
-  "sha256": "571e8cb09300e9a580bf49830a61f6be3ee4357b704b24a303a607da2d4bff5b",
-  "android_runtime_tested": false,
-  "ui_visually_inspected": false,
-  "cimanow_playback_verified": false,
-  "known_build_warnings": [
-    "D8 Kotlin metadata rewrite warnings, non-fatal",
-    "SDK platform-tools absent; build and tests succeeded without them"
+  "dex_class_count": 31,
+  "compiled_classes_confirmed_in_dex": 15,
+  "test_suites": [
+    {
+      "name": "com.kemo.cimanowtest.BrowserLayoutTest",
+      "tests": "8",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    },
+    {
+      "name": "com.kemo.cimanowtest.MediaSignaturesTest",
+      "tests": "5",
+      "failures": "0",
+      "errors": "0",
+      "skipped": "0"
+    }
+  ],
+  "layout_evidence": {
+    "framework": "Robolectric, Android API 28 and 33",
+    "webview": "Test-only measurement/frame shadow, no Chromium and no website network",
+    "images": "Annotated native-control layout previews; the measured browser slot is shaded, not website-rendering evidence",
+    "landscape_800x360_no_candidates": [
+      800,
+      313
+    ],
+    "landscape_800x360_one_fixture_candidate": [
+      800,
+      257
+    ],
+    "landscape_640x270_no_candidates": [
+      640,
+      223
+    ]
+  },
+  "verified": [
+    "Full Gradle build",
+    "Five media-signature tests",
+    "Four UI/diagnostic/cleanup tests on each of API 28 and 33",
+    "Packaged DEX definitions",
+    "Test classes excluded"
+  ],
+  "not_verified": [
+    "Real WebView rendering on a phone for v2",
+    "Website gateway acceptance",
+    "Watch-page/server flow",
+    "Correct-title media extraction",
+    "Native-player playback"
+  ],
+  "stable": {
+    "master": "f37be47a7686bf908043d4f9c89506a2946a1a06",
+    "builds": "54550efeb01db6da33edc9a746d73236d7746875",
+    "ExampleProvider": 25
+  },
+  "classes": [
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda0;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda10;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda1;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda2;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda3;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda4;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda5;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda6;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda7;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda8;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$$ExternalSyntheticLambda9;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$1;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$2$$ExternalSyntheticLambda0;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$2;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$3$$ExternalSyntheticLambda0;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$3;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$Listener;",
+    "Lcom/kemo/cimanowtest/BrowserBridge$Media;",
+    "Lcom/kemo/cimanowtest/BrowserBridge;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestPlugin$$ExternalSyntheticLambda0;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestPlugin$$ExternalSyntheticLambda1;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestPlugin;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$$ExternalSyntheticLambda0;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$load$2;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$loadLinks$1;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$loadLinks$2;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$loadLinks$media$1$1$1;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$loadLinks$media$1$1$2;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider$loadLinks$media$1$1;",
+    "Lcom/kemo/cimanowtest/CimaNowBrowserTestProvider;",
+    "Lcom/kemo/cimanowtest/MediaSignatures;"
   ]
 }
