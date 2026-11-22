@@ -16,6 +16,7 @@ class ExamplePlugin: Plugin() {
         registerMainAPI(ExampleProvider())
         registerMainAPI(MyCimaProvider())
         registerMainAPI(ArabSeedProvider())
+        registerMainAPI(Cima4UProvider())
 
 
         openSettings = {
