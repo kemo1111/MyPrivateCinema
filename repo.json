@@ -1,0 +1,8 @@
+{
+  "name": "Kemo CimaNow Test Only",
+  "description": "Isolated experimental browser bridge. Stable ExampleProvider unchanged.",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/cimanow-test-builds/plugins.json"
+  ]
+}

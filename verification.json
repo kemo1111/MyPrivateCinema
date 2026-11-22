@@ -1,0 +1,22 @@
+{
+  "built_at_utc": "2026-11-22T18:57:52.296786+00:00",
+  "gradle_build": "success",
+  "signature_unit_tests": 5,
+  "failures": 0,
+  "dex_classes": 29,
+  "required_classes_present": true,
+  "manifest": {
+    "requiresResources": false,
+    "version": 1,
+    "pluginClassName": "com.kemo.cimanowtest.CimaNowBrowserTestPlugin",
+    "name": "CimaNowBrowserTest"
+  },
+  "sha256": "571e8cb09300e9a580bf49830a61f6be3ee4357b704b24a303a607da2d4bff5b",
+  "android_runtime_tested": false,
+  "ui_visually_inspected": false,
+  "cimanow_playback_verified": false,
+  "known_build_warnings": [
+    "D8 Kotlin metadata rewrite warnings, non-fatal",
+    "SDK platform-tools absent; build and tests succeeded without them"
+  ]
+}
