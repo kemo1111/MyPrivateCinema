@@ -70,10 +70,18 @@ class Shahid4uProvider : MainAPI() {
     }
 
     private fun Element.extractPoster(): String? {
-        return this.selectFirst(".postImgBg")?.attr("style")?.getImageURL()
-            ?: this.selectFirst("img")?.let { img ->
-                img.attr("data-src").ifEmpty { img.attr("data-image") }.ifEmpty { img.attr("src") }
-            }
+        val bgUrl: String? = this.selectFirst(".postImgBg")?.attr("style")?.getImageURL()
+        if (!bgUrl.isNullOrEmpty()) return bgUrl
+        val img: Element = this.selectFirst("img") ?: return null
+        val dataSrc: String = img.attr("data-src")
+        val dataImage: String = img.attr("data-image")
+        val src: String = img.attr("src")
+        val chosen: String = when {
+            dataSrc.isNotEmpty() -> dataSrc
+            dataImage.isNotEmpty() -> dataImage
+            else -> src
+        }
+        return chosen.ifEmpty { null }
     }
 
     private fun Element.toSearchResponse(): SearchResponse? {
