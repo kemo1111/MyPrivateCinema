@@ -1,0 +1,46 @@
+name: CimaNow isolated browser test
+on:
+  push:
+    branches: [cimanow-browser-test]
+  workflow_dispatch:
+permissions:
+  contents: write
+concurrency:
+  group: cimanow-browser-test-only
+  cancel-in-progress: true
+jobs:
+  build-test:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-java@v4
+        with:
+          distribution: temurin
+          java-version: '17'
+      - uses: android-actions/setup-android@v4
+      - name: Build isolated plugin and signature tests
+        run: |
+          chmod +x gradlew
+          ./gradlew :CimaNowBrowserTest:testDebugUnitTest :CimaNowBrowserTest:make makePluginsJson
+      - name: Prepare isolated test repository
+        run: |
+          mkdir -p /tmp/cimanow-output
+          cp CimaNowBrowserTest/build/CimaNowBrowserTest.cs3 /tmp/cimanow-output/
+          python3 scripts/prepare_cimanow_test.py
+      - name: Retain build evidence
+        uses: actions/upload-artifact@v4
+        with:
+          name: CimaNowBrowserTest
+          path: |
+            /tmp/cimanow-output/*
+            CimaNowBrowserTest/build/test-results/testDebugUnitTest/*.xml
+      - name: Publish only isolated test branch
+        run: |
+          git checkout --orphan cimanow-test-builds
+          git rm -rf .
+          cp /tmp/cimanow-output/* .
+          git config user.name 'github-actions[bot]'
+          git config user.email '41898282+github-actions[bot]@users.noreply.github.com'
+          git add .
+          git commit -m "Isolated CimaNow browser test from $GITHUB_SHA"
+          git push origin HEAD:refs/heads/cimanow-test-builds --force
