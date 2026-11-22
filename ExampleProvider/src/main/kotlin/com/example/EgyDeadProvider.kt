@@ -64,7 +64,7 @@ class EgyDeadProvider : MainAPI() {
         val i: Int = id ?: return null
         val title = clean(name)
         if (title.isBlank()) return null
-        val u = "title:$i:${if (is_series == true) 1 else 0}"
+        val u = "$mainUrl/titles/$i"
         return if (is_series == true) {
             newTvSeriesSearchResponse(title, u, TvType.TvSeries) { this.posterUrl = poster }
         } else {
@@ -92,8 +92,8 @@ class EgyDeadProvider : MainAPI() {
     }
 
     override suspend fun load(url: String): LoadResponse {
-        val parts = url.split(":")
-        val id = parts[1]
+        val id: String = Regex("/titles/(\\d+)").find(url)?.groupValues?.get(1)
+            ?: throw ErrorLoadingException("bad url")
         val t: TitleFull = parseJson<TitleResp>(api("titles/$id")).title ?: throw ErrorLoadingException("not found")
         val title = clean(t.name)
         if (t.is_series == true) {
