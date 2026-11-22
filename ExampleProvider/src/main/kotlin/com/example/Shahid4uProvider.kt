@@ -74,7 +74,7 @@ class Shahid4uProvider : MainAPI() {
             ?.attr("href")
 
         if (url.contains("/film/")) {
-            return newMovieLoadResponse(title, url, TvType.Movie, watchHref ?: url) {
+            return newMovieLoadResponse(title, url, TvType.Movie, url) {
                 this.posterUrl = poster
             }
         }
