@@ -1,10 +1,11 @@
 dependencies {
     implementation("com.google.android.material:material:1.12.0")
     implementation("androidx.recyclerview:recyclerview:1.3.2")
+    testImplementation("junit:junit:4.13.2")
 }
 
 // Use an integer for version numbers - bump this by 1 on EVERY update
-version = 22
+version = 23
 
 cloudstream {
     description = "إضافات كيمو: TopCinema و MyCima و ArabSeed و Cima4U و FaselHD و EgyDead و Shahid4U"

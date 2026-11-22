@@ -21,6 +21,23 @@ import org.jsoup.nodes.Element
 // full resolve chain inside load(), where thrown ErrorLoadingException
 // messages ARE displayed on the detail page. The probe makes loading a title
 // slightly slower; remove it once the failing stage is identified.
+
+// OkHttp rejects non-ASCII characters in header VALUES (e.g. Referer), while
+// it percent-encodes request URLs itself. This site's slugs are Arabic, so any
+// header derived from a URL must be encoded or the request crashes inside
+// header validation - which CloudStream then swallows into "No Links Found".
+internal fun encodeForHeader(url: String): String {
+    val q = url.indexOf('?')
+    val base = if (q >= 0) url.substring(0, q) else url
+    val query = if (q >= 0) url.substring(q) else ""
+    val encodedBase = base.split("/").joinToString("/") { seg ->
+        if (seg.any { it.code > 127 }) {
+            java.net.URLEncoder.encode(seg, "UTF-8").replace("+", "%20")
+        } else seg
+    }
+    return encodedBase + query
+}
+
 class Shahid4uProvider : MainAPI() {
     override var mainUrl = "https://shahed4u.here"
     override var name = "Shahid4u"
@@ -81,7 +98,7 @@ class Shahid4uProvider : MainAPI() {
         url: String,
         cookies: MutableMap<String, String>,
         referer: String? = null
-    ) = app.get(url, referer = referer, cookies = cookies, timeout = reqTimeout).also {
+    ) = app.get(url, referer = referer?.let(::encodeForHeader), cookies = cookies, timeout = reqTimeout).also {
         cookies.putAll(it.cookies)
     }
 
@@ -113,7 +130,7 @@ class Shahid4uProvider : MainAPI() {
             // Browsers always send Origin on this POST; match them.
             "Origin" to mainUrl,
         ),
-        referer = watchUrl,
+        referer = encodeForHeader(watchUrl),
         cookies = cookies,
         json = mapOf("key" to key, "token" to token, "human_signal" to null),
         timeout = reqTimeout,
@@ -254,7 +271,7 @@ class Shahid4uProvider : MainAPI() {
                     ?: return@runCatching
 
                 found = true
-                loadExtractor(embed, watchUrl, subtitleCallback, callback)
+                loadExtractor(embed, encodeForHeader(watchUrl), subtitleCallback, callback)
             }
         }
         if (!found) {
