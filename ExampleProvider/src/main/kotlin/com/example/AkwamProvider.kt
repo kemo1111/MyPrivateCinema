@@ -61,6 +61,17 @@ class AkwamProvider : MainAPI() {
         return url.contains("/games/") || url.contains("/programs/") || url.contains("/category/")
     }
 
+    // Explicit types: jsoup's jspecify-annotated returns break Kotlin 2.x type
+    // inference in chained lambdas (compile error on the CI toolchain).
+    private fun pickPoster(img: Element?): String? {
+        if (img == null) return null
+        val dataSrc: String = img.attr("data-src")
+        if (dataSrc.isNotBlank() && !dataSrc.contains("load.jpg")) return dataSrc
+        val src: String = img.attr("src")
+        if (src.isNotBlank() && !src.contains("load.jpg")) return src
+        return null
+    }
+
     // Listing pages (/movies, /series, /recent): div.entry-box with a.box
     private fun Element.toSearchResponse(): SearchResponse? {
         val a = selectFirst("a.box, a") ?: return null
@@ -71,8 +82,7 @@ class AkwamProvider : MainAPI() {
             ?: poster?.attr("title")?.takeIf { it.isNotBlank() }
             ?: selectFirst("h3, .entry-title")?.text()
             ?: return null
-        val posterUrl = poster?.attr("data-src")?.takeIf { it.isNotBlank() }
-            ?: poster?.attr("src")?.takeIf { it.isNotBlank() && !it.contains("load.jpg") }
+        val posterUrl = pickPoster(poster)
         val year = selectFirst(".badge-secondary, .badge")?.text()?.toIntOrNull()
 
         return newMovieSearchResponse(
@@ -96,8 +106,7 @@ class AkwamProvider : MainAPI() {
         val title = a.attr("title").takeIf { it.isNotBlank() }
             ?: poster?.attr("alt")?.takeIf { it.isNotBlank() }
             ?: return null
-        val posterUrl = poster?.attr("data-src")?.takeIf { it.isNotBlank() && !it.contains("load.jpg") }
-            ?: poster?.attr("src")?.takeIf { it.isNotBlank() && !it.contains("load.jpg") }
+        val posterUrl = pickPoster(poster)
 
         return newMovieSearchResponse(
             cleanTitle(title),
@@ -143,11 +152,9 @@ class AkwamProvider : MainAPI() {
         val title = cleanTitle(
             doc.selectFirst("h1.entry-title, h1")?.text()?.trim() ?: "Unknown"
         )
-        val posterUrl = doc.selectFirst("picture > img, .entry-image img, img.img-fluid, img")
-            ?.let { img ->
-                img.attr("data-src").takeIf { it.isNotBlank() && !it.contains("load.jpg") }
-                    ?: img.attr("src").takeIf { it.isNotBlank() && !it.contains("load.jpg") }
-            }?.let { fixUrlNull(it) }
+        val posterUrl = pickPoster(
+            doc.selectFirst("picture > img, .entry-image img, img.img-fluid, img")
+        )?.let { fixUrlNull(it) }
 
         val year = doc.select("div.font-size-16.text-white.mt-2, .widget-body div").firstOrNull {
             it.text().contains("السنة")
