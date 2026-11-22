@@ -4,6 +4,9 @@ import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.network.CloudflareKiller
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
 import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.ExtractorLinkType
+import com.lagradost.cloudstream3.utils.newExtractorLink
+import com.lagradost.cloudstream3.utils.Qualities
 import com.lagradost.cloudstream3.utils.loadExtractor
 
 // Original code written for this repo against the public JSON API used by the
@@ -133,6 +136,31 @@ class EgyDeadProvider : MainAPI() {
         }
     }
 
+    // The site's own player host serves a JW Player page with the stream in a
+    // `sources: [{file:"..."}]` block. No built-in extractor covers it.
+    private suspend fun loadEgyBestVid(embed: String, callback: (ExtractorLink) -> Unit): Boolean {
+        val html: String = try {
+            app.get(embed, headers = mapOf("Referer" to "$mainUrl/")).text
+        } catch (e: Exception) {
+            return false
+        }
+        val m = Regex("""file\s*:\s*["']([^"']+\.(?:m3u8|mp4)[^"']*)["']""").find(html) ?: return false
+        val link: String = m.groupValues[1].replace("&amp;", "&")
+        val isHls: Boolean = link.contains(".m3u8")
+        callback(
+            newExtractorLink(
+                name,
+                name,
+                link,
+                if (isHls) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
+            ) {
+                this.referer = embed
+                this.quality = Qualities.Unknown.value
+            }
+        )
+        return true
+    }
+
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -148,8 +176,12 @@ class EgyDeadProvider : MainAPI() {
         for (v in all.distinctBy { it.src }) {
             val src: String = v.src ?: continue
             if (src.startsWith("http")) {
-                loadExtractor(src, "$mainUrl/", subtitleCallback, callback)
-                found = true
+                if (src.contains("egybestvid.com")) {
+                    if (loadEgyBestVid(src, callback)) found = true
+                } else {
+                    loadExtractor(src, "$mainUrl/", subtitleCallback, callback)
+                    found = true
+                }
             }
         }
         return found
