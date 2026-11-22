@@ -7,6 +7,13 @@ cloudstream {
     tvTypes = listOf("Movie")
     requiresResources = false
 }
-android { namespace = "com.kemo.cimanowtest" }
+android { namespace = "com.kemo.cimanowtest"; buildToolsVersion = "35.0.0" }
 dependencies { testImplementation("junit:junit:4.13.2") }
 tasks.withType<JavaCompile>().configureEach { options.encoding = "UTF-8" }
+dependencies { compileOnly("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.7.1") }
+// The vendored CloudStream Gradle plugin adds Kotlin output only. Include our Java bridge too.
+tasks.withType<com.lagradost.cloudstream3.gradle.tasks.CompileDexTask>().configureEach {
+    val javaTask = tasks.named<JavaCompile>("compileDebugJavaWithJavac")
+    dependsOn(javaTask)
+    input.from(javaTask.flatMap { it.destinationDirectory })
+}

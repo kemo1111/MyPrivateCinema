@@ -10,7 +10,7 @@ plugins = json.loads(Path('build/plugins.json').read_text())
 plugins = [p for p in plugins if p['internalName'] == 'CimaNowBrowserTest']
 assert len(plugins) == 1, 'Only the isolated plugin may be published'
 artifact = out / 'CimaNowBrowserTest.cs3'
-plugins[0].update(url=f'{base}/CimaNowBrowserTest.cs3', name='CimaNow Browser Test',
+plugins[0].update(repositoryUrl=f'https://github.com/{repo}', url=f'{base}/CimaNowBrowserTest.cs3', name='CimaNow Browser Test',
                   fileSize=artifact.stat().st_size,
                   fileHash='sha256-' + hashlib.sha256(artifact.read_bytes()).hexdigest())
 (out / 'plugins.json').write_text(json.dumps(plugins, ensure_ascii=False, indent=2))
