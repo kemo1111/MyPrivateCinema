@@ -4,7 +4,7 @@ dependencies {
 }
 
 // Use an integer for version numbers - bump this by 1 on EVERY update
-version = 21
+version = 22
 
 cloudstream {
     description = "إضافات كيمو: TopCinema و MyCima و ArabSeed و Cima4U و FaselHD و EgyDead و Shahid4U"

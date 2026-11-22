@@ -15,12 +15,23 @@ import org.jsoup.nodes.Element
 // Selectors and the full resolve chain were verified in a desktop browser on
 // 2026-11-22. Playback inside CloudStream on device is NOT yet confirmed;
 // the site sits behind Cloudflare and rotates domains, so report breakage.
+//
+// v22 note: CloudStream swallows every exception thrown from loadLinks (the
+// UI only shows "No Links Found"), so this build runs a labelled probe of the
+// full resolve chain inside load(), where thrown ErrorLoadingException
+// messages ARE displayed on the detail page. The probe makes loading a title
+// slightly slower; remove it once the failing stage is identified.
 class Shahid4uProvider : MainAPI() {
     override var mainUrl = "https://shahed4u.here"
     override var name = "Shahid4u"
     override var lang = "ar"
     override val hasMainPage = true
     override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
+
+    // NiceHttp's per-request default is unlimited; CloudStream wraps the whole
+    // loadLinks call in a 120s timeout, so one hung request would silently eat
+    // the entire window. Bound every request instead.
+    private val reqTimeout = 20L
 
     override val mainPage = mainPageOf(
         "" to "أحدث الإضافات",
@@ -53,25 +64,114 @@ class Shahid4uProvider : MainAPI() {
         } else {
             "$mainUrl${request.data}?page=$page"
         }
-        val doc = app.get(url).document
+        val doc = app.get(url, timeout = reqTimeout).document
         val items: List<SearchResponse> = doc.select("a.show-card").mapNotNull { it.toSearchResponse() }
         return newHomePageResponse(request.name, items, hasNext = items.isNotEmpty())
     }
 
     override suspend fun search(query: String): List<SearchResponse> {
-        val doc = app.get(mainUrl, params = mapOf("s" to query)).document
+        val doc = app.get(mainUrl, params = mapOf("s" to query), timeout = reqTimeout).document
         return doc.select("a.show-card").mapNotNull { it.toSearchResponse() }
     }
 
+    // The site's /watch/resolve is bound to the Laravel session cookie and
+    // CloudStream keeps no cookie jar, so every step must carry the cookies
+    // collected from the previous one, like a browser session would.
+    private suspend fun getWithSession(
+        url: String,
+        cookies: MutableMap<String, String>,
+        referer: String? = null
+    ) = app.get(url, referer = referer, cookies = cookies, timeout = reqTimeout).also {
+        cookies.putAll(it.cookies)
+    }
+
+    private fun findWatchHref(doc: org.jsoup.nodes.Document): String? =
+        doc.select("a").firstOrNull { it.text().trim() == "مشاهدة الآن" }?.attr("href")
+
+    data class ServerEntry(val name: String, val token: String)
+
+    private fun parseServers(doc: org.jsoup.nodes.Document): List<ServerEntry> =
+        doc.select("button.btn-server").mapNotNull { b: Element ->
+            val token: String = b.attr("data-token")
+            if (token.isBlank()) return@mapNotNull null
+            val serverName: String = b.selectFirst("img")?.attr("title")?.trim().orEmpty()
+            ServerEntry(serverName, token)
+        }
+
+    private suspend fun postResolve(
+        csrf: String,
+        key: String,
+        token: String,
+        watchUrl: String,
+        cookies: Map<String, String>
+    ) = app.post(
+        "$mainUrl/watch/resolve",
+        headers = mapOf(
+            "X-CSRF-TOKEN" to csrf,
+            "X-Requested-With" to "XMLHttpRequest",
+            "Accept" to "application/json",
+            // Browsers always send Origin on this POST; match them.
+            "Origin" to mainUrl,
+        ),
+        referer = watchUrl,
+        cookies = cookies,
+        json = mapOf("key" to key, "token" to token, "human_signal" to null),
+        timeout = reqTimeout,
+    )
+
+    data class ResolveResponse(val ok: Boolean? = null, val url: String? = null)
+
+    // Diagnostic probe (v22): walks the exact chain loadLinks uses - watch page,
+    // player tokens, one resolve POST, the /m/ redirect page - and throws a
+    // labelled ErrorLoadingException at the first failing stage. load() errors
+    // are shown on the detail page; loadLinks errors are not.
+    private suspend fun probeResolveChain(
+        watchUrl: String,
+        cookies: MutableMap<String, String>
+    ) {
+        val watchResp = getWithSession(watchUrl, cookies)
+        if (!watchResp.isSuccessful) {
+            throw ErrorLoadingException("S4U probe: watch page HTTP ${watchResp.code}")
+        }
+        val watchHtml: String = watchResp.text
+        val csrf: String = Regex("csrfToken\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
+            ?: throw ErrorLoadingException("S4U probe: player tokens missing (challenge or layout change)")
+        val key: String = Regex("watchResolveKey\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
+            ?: throw ErrorLoadingException("S4U probe: resolve key missing")
+
+        val servers: List<ServerEntry> = parseServers(watchResp.document)
+        if (servers.isEmpty()) throw ErrorLoadingException("S4U probe: no servers listed")
+
+        val first: ServerEntry = servers.first()
+        val resp = postResolve(csrf, key, first.token, watchUrl, cookies)
+        val resolved: ResolveResponse? = runCatching { parseJson<ResolveResponse>(resp.text) }.getOrNull()
+        val mUrl: String? = resolved?.url?.takeIf { it.isNotBlank() }
+        if (mUrl == null) {
+            throw ErrorLoadingException("S4U probe: resolve rejected (HTTP ${resp.code}, ok=${resolved?.ok})")
+        }
+
+        val mResp = getWithSession(fixUrl(mUrl), cookies, referer = watchUrl)
+        val embed: String? = Regex("iframe src=\"(https?://[^\"]+)\"").find(mResp.text)?.groupValues?.get(1)
+        if (embed == null) {
+            throw ErrorLoadingException("S4U probe: player page HTTP ${mResp.code}, no embed iframe")
+        }
+        // Probe passed: session, resolve and /m/ all work from this app.
+    }
+
     override suspend fun load(url: String): LoadResponse {
-        val doc = app.get(url).document
+        val cookies = mutableMapOf<String, String>()
+        getWithSession(mainUrl, cookies) // establish the session first
+        val pageResp = getWithSession(url, cookies, referer = mainUrl)
+        val doc = pageResp.document
         val title: String = doc.selectFirst("h1")?.text()?.trim()
             ?: doc.title().substringBefore(" - ").trim()
         val poster: String? = doc.selectFirst("meta[property=og:image]")?.attr("content")
             ?: doc.selectFirst("img[src*=uploads]")?.attr("src")
-        val watchHref: String? = doc.select("a")
-            .firstOrNull { it.text().trim() == "مشاهدة الآن" }
-            ?.attr("href")
+        val watchHref: String? = findWatchHref(doc)
+
+        if (watchHref != null) {
+            probeResolveChain(fixUrl(watchHref), cookies)
+        }
 
         if (url.contains("/film/")) {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
@@ -101,8 +201,6 @@ class Shahid4uProvider : MainAPI() {
         }
     }
 
-    data class ResolveResponse(val ok: Boolean? = null, val url: String? = null)
-
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
@@ -110,31 +208,22 @@ class Shahid4uProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         // data may be a /film/ or /episode/ page or a direct /watch/ page.
-        // The site's /watch/resolve is bound to the Laravel session cookie and
-        // CloudStream keeps no cookie jar, so every step must carry the cookies
-        // collected from the previous one, like a browser session would.
         val sessionCookies = mutableMapOf<String, String>()
-
-        val rootResp = app.get(mainUrl)
-        sessionCookies.putAll(rootResp.cookies)
+        getWithSession(mainUrl, sessionCookies)
 
         val watchUrl: String
         if (data.contains("/watch/")) {
             watchUrl = data
         } else {
-            val pageResp = app.get(data, referer = mainUrl, cookies = sessionCookies)
-            sessionCookies.putAll(pageResp.cookies)
-            val href: String? = pageResp.document.select("a")
-                .firstOrNull { it.text().trim() == "مشاهدة الآن" }
-                ?.attr("href")
+            val pageResp = getWithSession(data, sessionCookies, referer = mainUrl)
+            val href: String? = findWatchHref(pageResp.document)
             if (href.isNullOrBlank()) {
                 throw ErrorLoadingException("Shahid4u: watch button not found on content page")
             }
             watchUrl = fixUrl(href)
         }
 
-        val watchResp = app.get(watchUrl, referer = data, cookies = sessionCookies)
-        sessionCookies.putAll(watchResp.cookies)
+        val watchResp = getWithSession(watchUrl, sessionCookies, referer = data)
         val watchHtml: String = watchResp.text
         val doc = watchResp.document
 
@@ -143,29 +232,14 @@ class Shahid4uProvider : MainAPI() {
         val key: String = Regex("watchResolveKey\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
             ?: throw ErrorLoadingException("Shahid4u: watch page missing resolve key")
 
-        val servers: List<Pair<String, String>> = doc.select("button.btn-server").mapNotNull { b: Element ->
-            val token: String = b.attr("data-token")
-            if (token.isBlank()) return@mapNotNull null
-            val serverName: String = b.selectFirst("img")?.attr("title")?.trim().orEmpty()
-            serverName to token
-        }
+        val servers: List<ServerEntry> = parseServers(doc)
         if (servers.isEmpty()) throw ErrorLoadingException("Shahid4u: no servers listed on watch page")
 
         var found = false
         var rejected = 0
-        servers.forEach { (serverName, token) ->
+        servers.forEach { server ->
             runCatching {
-                val resp = app.post(
-                    "$mainUrl/watch/resolve",
-                    headers = mapOf(
-                        "X-CSRF-TOKEN" to csrf,
-                        "X-Requested-With" to "XMLHttpRequest",
-                        "Accept" to "application/json",
-                    ),
-                    referer = watchUrl,
-                    cookies = sessionCookies,
-                    json = mapOf("key" to key, "token" to token, "human_signal" to null),
-                )
+                val resp = postResolve(csrf, key, server.token, watchUrl, sessionCookies)
                 val resolved: ResolveResponse? = runCatching {
                     parseJson<ResolveResponse>(resp.text)
                 }.getOrNull()
@@ -175,7 +249,7 @@ class Shahid4uProvider : MainAPI() {
                     return@runCatching
                 }
 
-                val mHtml: String = app.get(fixUrl(mUrl), referer = watchUrl, cookies = sessionCookies).text
+                val mHtml: String = getWithSession(fixUrl(mUrl), sessionCookies, referer = watchUrl).text
                 val embed: String = Regex("iframe src=\"(https?://[^\"]+)\"").find(mHtml)?.groupValues?.get(1)
                     ?: return@runCatching
 
