@@ -18,6 +18,7 @@ class ExamplePlugin: Plugin() {
         registerMainAPI(ArabSeedProvider())
         registerMainAPI(Cima4UProvider())
         registerMainAPI(FaselHDProvider())
+        registerMainAPI(EgyDeadProvider())
 
 
         openSettings = {
