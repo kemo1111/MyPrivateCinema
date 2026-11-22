@@ -3,6 +3,6 @@
   "description": "المستودع الخاص بكيمو",
   "manifestVersion": 1,
   "pluginLists": [
-    "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/builds/plugins.json?v=10"
+    "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/builds/plugins.json?v=11"
   ]
 }
