@@ -90,10 +90,10 @@ class ArabSeedProvider : MainAPI() {
             ?: a.attr("title").ifBlank { a.text() }.trim()
         if (title.isEmpty()) return null
 
-        val posterUrl = selectFirst(".post__image img, img.images__loader, img")?.let {
-            it.attr("data-src").ifEmpty {
-                it.attr("src")
-            }
+        val posterImg: Element? = selectFirst(".post__image img, img.images__loader, img")
+        val posterUrl: String? = posterImg?.let { img ->
+            val lazySrc: String = img.attr("data-src")
+            if (lazySrc.isEmpty()) img.attr("src") else lazySrc
         }
 
         val href = fixUrl(a.attr("href"))
