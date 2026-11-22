@@ -20,6 +20,12 @@ class ExamplePlugin: Plugin() {
         registerMainAPI(FaselHDProvider())
         registerMainAPI(EgyDeadProvider())
         registerMainAPI(Shahid4uProvider())
+        registerMainAPI(AkwamProvider())
+
+        // Extractors needed by Akwam watch pages (stmruby/streamruby players)
+        registerExtractorAPI(StreamRuby())
+        registerExtractorAPI(StmRuby())
+        registerExtractorAPI(RubyStream())
 
 
         openSettings = {

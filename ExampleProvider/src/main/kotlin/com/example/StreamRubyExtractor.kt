@@ -1,0 +1,134 @@
+/*
+ * StreamRuby extractors are adapted from StreamRuby.kt in
+ * https://github.com/ramailo1/arprov
+ *
+ * MIT License
+ *
+ * Copyright (c) 2025 ramailo1
+ *
+ * Permission is hereby granted, free of charge, to any person obtaining a copy
+ * of this software and associated documentation files (the "Software"), to deal
+ * in the Software without restriction, including without limitation the rights
+ * to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+ * copies of the Software, and to permit persons to whom the Software is
+ * furnished to do so, subject to the following conditions:
+ *
+ * The above copyright notice and this permission notice shall be included in all
+ * copies or substantial portions of the Software.
+ *
+ * THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+ * IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+ * FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+ * AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+ * LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+ * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+ * SOFTWARE.
+ *
+ * Changes: package com.example. Registered for the Akwam provider, whose
+ * episode watch pages embed stmruby.com players (verified live 2026-11-22).
+ */
+package com.example
+
+import com.lagradost.cloudstream3.utils.ExtractorApi
+import com.lagradost.cloudstream3.utils.ExtractorLink
+import com.lagradost.cloudstream3.utils.ExtractorLinkType
+import com.lagradost.cloudstream3.utils.M3u8Helper
+import com.lagradost.cloudstream3.utils.Qualities
+import com.lagradost.cloudstream3.utils.getAndUnpack
+import com.lagradost.cloudstream3.utils.newExtractorLink
+import com.lagradost.nicehttp.Requests
+
+open class StreamRuby : ExtractorApi() {
+    private val app = Requests()
+    override val name = "StreamRuby"
+    override val mainUrl = "https://streamruby.com"
+    override val requiresReferer = false
+
+    private val userAgents = listOf(
+        "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (Macintosh; Intel Mac OS X 10_15_7) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36",
+        "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36"
+    )
+
+    private fun unpackFallback(html: String): String? {
+        val header = "eval(function(p,a,c,k,e,d){"
+        val start = html.indexOf(header)
+        if (start < 0) return null
+        val end = html.indexOf("'.split('|'))", start)
+        if (end < 0) return null
+        val sepStart = html.lastIndexOf("',", end)
+        if (sepStart < start) return null
+        val sep = html.substring(sepStart + 2, end)
+        val sepMatch = Regex("^(\\d+),(\\d+),'([\\s\\S]*)$").find(sep) ?: return null
+        val a = sepMatch.groupValues[1].toInt()
+        val c = sepMatch.groupValues[2].toInt()
+        val k = sepMatch.groupValues[3].split("|")
+        if (c > k.size) return null
+        var p = html.substring(start + header.length, sepStart)
+        for (i in c - 1 downTo 0) {
+            val ki = k.getOrNull(i) ?: continue
+            if (ki.isEmpty()) continue
+            p = p.replace(Regex("\\b" + i.toString(a) + "\\b"), ki)
+        }
+        return p
+    }
+
+    override suspend fun getUrl(
+        url: String,
+        referer: String?,
+        subtitleCallback: (com.lagradost.cloudstream3.SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ) {
+        try {
+            val pageResp = app.get(
+                url,
+                headers = mapOf(
+                    "User-Agent" to userAgents.random(),
+                    "Referer" to (referer ?: url)
+                )
+            )
+            val html = pageResp.text
+
+            val unpacked = runCatching { getAndUnpack(html) }.getOrNull()
+                ?: unpackFallback(html)
+                ?: html
+
+            val m3u8Url = Regex("""file\s*:\s*["']([^"']+\.m3u8[^"']*)["']""").find(unpacked)?.groupValues?.get(1)
+                ?: Regex("""https?://[^\s"'<>]+\.m3u8[^\s"'<>]*""").find(unpacked)?.groupValues?.get(0)
+
+            if (!m3u8Url.isNullOrEmpty()) {
+                val links = runCatching {
+                    M3u8Helper.generateM3u8(name, m3u8Url, referer = url)
+                }.getOrNull()
+
+                if (!links.isNullOrEmpty()) {
+                    links.forEach(callback)
+                } else {
+                    callback(
+                        newExtractorLink(
+                            name,
+                            name,
+                            m3u8Url,
+                            ExtractorLinkType.M3U8
+                        ) {
+                            this.referer = url
+                            this.quality = Qualities.Unknown.value
+                        }
+                    )
+                }
+            }
+        } catch (e: Exception) {
+            // ignore
+        }
+    }
+}
+
+class StmRuby : StreamRuby() {
+    override val name = "StmRuby"
+    override val mainUrl = "https://stmruby.com"
+}
+
+class RubyStream : StreamRuby() {
+    override val name = "RubyStream"
+    override val mainUrl = "https://rubystream.net"
+}
