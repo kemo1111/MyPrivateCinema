@@ -4,10 +4,10 @@ dependencies {
 }
 
 // Use an integer for version numbers - bump this by 1 on EVERY update
-version = 10
+version = 11
 
 cloudstream {
-    description = "إضافات كيمو: TopCinema و MyCima"
+    description = "إضافات كيمو: TopCinema و MyCima و ArabSeed"
     authors = listOf("Kemo")
 
     /**
