@@ -127,8 +127,13 @@ class EgyDeadProvider : MainAPI() {
                 this.year = t.year
             }
         }
-        val vid: Int = t.primary_video?.id ?: t.videos?.firstOrNull()?.id ?: 0
-        return newMovieLoadResponse(title, url, TvType.Movie, "video:$vid") {
+        val ids = ArrayList<Int>()
+        t.primary_video?.id?.let { ids.add(it) }
+        for (v in t.videos.orEmpty()) {
+            val vi: Int = v.id ?: continue
+            if (!ids.contains(vi)) ids.add(vi)
+        }
+        return newMovieLoadResponse(title, url, TvType.Movie, "video:" + ids.joinToString(",")) {
             this.posterUrl = t.poster
             this.backgroundPosterUrl = t.backdrop
             this.plot = t.description
@@ -138,7 +143,7 @@ class EgyDeadProvider : MainAPI() {
 
     // The site's own player host serves a JW Player page with the stream in a
     // `sources: [{file:"..."}]` block. No built-in extractor covers it.
-    private suspend fun loadEgyBestVid(embed: String, callback: (ExtractorLink) -> Unit): Boolean {
+    private suspend fun loadEgyBestVid(embed: String, label: String, callback: (ExtractorLink) -> Unit): Boolean {
         val html: String = try {
             app.get(embed, headers = mapOf("Referer" to "$mainUrl/")).text
         } catch (e: Exception) {
@@ -150,7 +155,7 @@ class EgyDeadProvider : MainAPI() {
         callback(
             newExtractorLink(
                 name,
-                name,
+                label,
                 link,
                 if (isHls) ExtractorLinkType.M3U8 else ExtractorLinkType.VIDEO
             ) {
@@ -167,21 +172,29 @@ class EgyDeadProvider : MainAPI() {
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val vid = data.substringAfter("video:")
-        val w = parseJson<WatchResp>(api("watch/$vid"))
+        val ids: List<String> = data.substringAfter("video:").split(",").filter { it.isNotBlank() }
         val all = ArrayList<VideoItem>()
-        w.video?.let { all.add(it) }
-        all.addAll(w.alternative_videos.orEmpty())
+        for (vid in ids) {
+            val w: WatchResp = try {
+                parseJson<WatchResp>(api("watch/$vid"))
+            } catch (e: Exception) {
+                continue
+            }
+            w.video?.let { all.add(it) }
+            all.addAll(w.alternative_videos.orEmpty())
+        }
         var found = false
+        var n = 0
         for (v in all.distinctBy { it.src }) {
             val src: String = v.src ?: continue
-            if (src.startsWith("http")) {
-                if (src.contains("egybestvid.com")) {
-                    if (loadEgyBestVid(src, callback)) found = true
-                } else {
-                    loadExtractor(src, "$mainUrl/", subtitleCallback, callback)
-                    found = true
-                }
+            if (!src.startsWith("http")) continue
+            n++
+            val label: String = "$name " + (v.name ?: "$n")
+            if (src.contains("egybestvid.com")) {
+                if (loadEgyBestVid(src, label, callback)) found = true
+            } else {
+                loadExtractor(src, "$mainUrl/", subtitleCallback, callback)
+                found = true
             }
         }
         return found
