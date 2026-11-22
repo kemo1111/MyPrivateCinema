@@ -16,11 +16,11 @@ import org.jsoup.nodes.Element
 // 2026-11-22. Playback inside CloudStream on device is NOT yet confirmed;
 // the site sits behind Cloudflare and rotates domains, so report breakage.
 //
-// v22 note: CloudStream swallows every exception thrown from loadLinks (the
-// UI only shows "No Links Found"), so this build runs a labelled probe of the
-// full resolve chain inside load(), where thrown ErrorLoadingException
-// messages ARE displayed on the detail page. The probe makes loading a title
-// slightly slower; remove it once the failing stage is identified.
+// History: v22 added a labelled load-time probe that exposed the real defect
+// (OkHttp rejects Arabic characters in header values; every loadLinks call
+// crashed on the Arabic Referer and the app swallowed it). v23 fixed the
+// encoding and playback was confirmed on device, so v24 removes the probe;
+// session handling, timeouts, Origin header and encoding remain unchanged.
 
 // OkHttp rejects non-ASCII characters in header VALUES (e.g. Referer), while
 // it percent-encodes request URLs itself. This site's slugs are Arabic, so any
@@ -138,43 +138,6 @@ class Shahid4uProvider : MainAPI() {
 
     data class ResolveResponse(val ok: Boolean? = null, val url: String? = null)
 
-    // Diagnostic probe (v22): walks the exact chain loadLinks uses - watch page,
-    // player tokens, one resolve POST, the /m/ redirect page - and throws a
-    // labelled ErrorLoadingException at the first failing stage. load() errors
-    // are shown on the detail page; loadLinks errors are not.
-    private suspend fun probeResolveChain(
-        watchUrl: String,
-        cookies: MutableMap<String, String>
-    ) {
-        val watchResp = getWithSession(watchUrl, cookies)
-        if (!watchResp.isSuccessful) {
-            throw ErrorLoadingException("S4U probe: watch page HTTP ${watchResp.code}")
-        }
-        val watchHtml: String = watchResp.text
-        val csrf: String = Regex("csrfToken\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
-            ?: throw ErrorLoadingException("S4U probe: player tokens missing (challenge or layout change)")
-        val key: String = Regex("watchResolveKey\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
-            ?: throw ErrorLoadingException("S4U probe: resolve key missing")
-
-        val servers: List<ServerEntry> = parseServers(watchResp.document)
-        if (servers.isEmpty()) throw ErrorLoadingException("S4U probe: no servers listed")
-
-        val first: ServerEntry = servers.first()
-        val resp = postResolve(csrf, key, first.token, watchUrl, cookies)
-        val resolved: ResolveResponse? = runCatching { parseJson<ResolveResponse>(resp.text) }.getOrNull()
-        val mUrl: String? = resolved?.url?.takeIf { it.isNotBlank() }
-        if (mUrl == null) {
-            throw ErrorLoadingException("S4U probe: resolve rejected (HTTP ${resp.code}, ok=${resolved?.ok})")
-        }
-
-        val mResp = getWithSession(fixUrl(mUrl), cookies, referer = watchUrl)
-        val embed: String? = Regex("iframe src=\"(https?://[^\"]+)\"").find(mResp.text)?.groupValues?.get(1)
-        if (embed == null) {
-            throw ErrorLoadingException("S4U probe: player page HTTP ${mResp.code}, no embed iframe")
-        }
-        // Probe passed: session, resolve and /m/ all work from this app.
-    }
-
     override suspend fun load(url: String): LoadResponse {
         val cookies = mutableMapOf<String, String>()
         getWithSession(mainUrl, cookies) // establish the session first
@@ -185,10 +148,6 @@ class Shahid4uProvider : MainAPI() {
         val poster: String? = doc.selectFirst("meta[property=og:image]")?.attr("content")
             ?: doc.selectFirst("img[src*=uploads]")?.attr("src")
         val watchHref: String? = findWatchHref(doc)
-
-        if (watchHref != null) {
-            probeResolveChain(fixUrl(watchHref), cookies)
-        }
 
         if (url.contains("/film/")) {
             return newMovieLoadResponse(title, url, TvType.Movie, url) {
