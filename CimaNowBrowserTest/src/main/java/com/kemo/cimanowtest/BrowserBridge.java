@@ -3,6 +3,13 @@ package com.kemo.cimanowtest;
 // Original experimental bridge for Kareem. No third-party provider implementation copied.
 import android.app.Activity;
 import android.app.Application;
+import android.app.AlertDialog;
+import android.graphics.Color;
+import android.text.TextUtils;
+import android.view.ViewGroup;
+import android.webkit.WebResourceError;
+import android.widget.HorizontalScrollView;
+import android.widget.ProgressBar;
 import android.app.Dialog;
 import android.net.Uri;
 import android.os.Build;
@@ -62,6 +69,12 @@ public final class BrowserBridge {
     private Listener listener;
     private TextView status;
     private LinearLayout choices;
+    private HorizontalScrollView candidateStrip;
+    private ProgressBar progress;
+    private WebView primaryBrowser;
+    private Dialog helpDialog;
+    private String pageState = "لسه التحميل ما بدأش";
+    private boolean pageFailed;
     private boolean active;
     private volatile HttpsURLConnection checking;
     private final Runnable timeout = () -> finish(null, "انتهت مهلة الاختبار. افتح الاختبار من جديد لو حبيت تحاول لاحقاً.");
@@ -92,27 +105,48 @@ public final class BrowserBridge {
             LinearLayout layout = new LinearLayout(activity);
             layout.setOrientation(LinearLayout.VERTICAL);
             layout.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
-            status = new TextView(activity);
-            status.setPadding(dp(10), dp(8), dp(10), dp(8));
-            status.setText("تجربة سيما ناو، مش تشغيل مضمون. افتح العمل واكمل التحقق بنفسك. اضغط تشغيل في صفحة الموقع. أي روابط تظهر تحت ممكن تكون إعلانات؛ اختار رابط العمل فقط.");
-            layout.addView(status);
+            layout.setFitsSystemWindows(true);
+            layout.setBackgroundColor(Color.BLACK);
             LinearLayout toolbar = new LinearLayout(activity);
+            toolbar.setGravity(android.view.Gravity.CENTER_VERTICAL);
+            toolbar.setLayoutDirection(View.LAYOUT_DIRECTION_RTL);
+            status = new TextView(activity);
+            status.setTextColor(Color.WHITE);
+            status.setTextSize(12);
+            status.setGravity(android.view.Gravity.CENTER_VERTICAL | android.view.Gravity.RIGHT);
+            status.setSingleLine(true);
+            status.setEllipsize(TextUtils.TruncateAt.END);
+            status.setPadding(dp(8), 0, dp(8), 0);
+            status.setText("بدء اختبار المتصفح…");
+            toolbar.addView(status, new LinearLayout.LayoutParams(0, -1, 1));
+            Button help = new Button(activity);
+            help.setText("شرح");
+            help.setTextSize(12);
+            help.setMinWidth(0);
+            help.setMinimumWidth(0);
+            help.setOnClickListener(v -> showHelp());
+            toolbar.addView(help, new LinearLayout.LayoutParams(dp(58), -1));
             Button close = new Button(activity);
             close.setText("إلغاء");
+            close.setTextSize(12);
+            close.setMinWidth(0);
+            close.setMinimumWidth(0);
             close.setOnClickListener(v -> cancel());
-            toolbar.addView(close);
-            Button home = new Button(activity);
-            home.setText("رئيسية سيما ناو");
-            toolbar.addView(home);
-            layout.addView(toolbar);
+            toolbar.addView(close, new LinearLayout.LayoutParams(dp(58), -1));
+            layout.addView(toolbar, new LinearLayout.LayoutParams(-1, dp(44)));
+            progress = new ProgressBar(activity, null, android.R.attr.progressBarStyleHorizontal);
+            progress.setMax(100);
+            layout.addView(progress, new LinearLayout.LayoutParams(-1, dp(3)));
             WebView browser = browser();
-            home.setOnClickListener(v -> browser.loadUrl("https://cimanow.cc/"));
+            primaryBrowser = browser;
+            browser.setBackgroundColor(Color.WHITE);
             layout.addView(browser, new LinearLayout.LayoutParams(-1, 0, 1));
             choices = new LinearLayout(activity);
-            choices.setOrientation(LinearLayout.VERTICAL);
-            ScrollView list = new ScrollView(activity);
-            list.addView(choices);
-            layout.addView(list, new LinearLayout.LayoutParams(-1, dp(130)));
+            choices.setOrientation(LinearLayout.HORIZONTAL);
+            candidateStrip = new HorizontalScrollView(activity);
+            candidateStrip.addView(choices);
+            candidateStrip.setVisibility(View.GONE);
+            layout.addView(candidateStrip, new LinearLayout.LayoutParams(-1, dp(56)));
             show(browser, layout, true);
             browser.loadUrl(initialUrl);
         });
@@ -130,6 +164,38 @@ public final class BrowserBridge {
         settings.setJavaScriptCanOpenWindowsAutomatically(false);
         // Native UA, cookie handling and TLS checks stay unchanged. No injected code or JS bridge.
         browser.setWebViewClient(new WebViewClient() {
+            @Override public void onPageStarted(WebView view, String url, android.graphics.Bitmap favicon) {
+                if (view == primaryBrowser && active) {
+                    pageFailed = false;
+                    pageState = "جاري تحميل الصفحة • " + Uri.parse(url).getHost();
+                    status.setText(pageState);
+                    progress.setVisibility(View.VISIBLE);
+                }
+            }
+            @Override public void onPageFinished(WebView view, String url) {
+                if (view == primaryBrowser && active) {
+                    if (!pageFailed) {
+                        pageState = "تم تحميل مستند الصفحة • " + Uri.parse(url).getHost();
+                        status.setText(pageState);
+                    }
+                    progress.setVisibility(View.GONE);
+                }
+            }
+            @Override public void onReceivedError(WebView view, WebResourceRequest request, WebResourceError error) {
+                if (view == primaryBrowser && active && request.isForMainFrame()) {
+                    pageFailed = true;
+                    pageState = "خطأ تحميل الصفحة: " + error.getErrorCode();
+                    status.setText(pageState);
+                    progress.setVisibility(View.GONE);
+                }
+            }
+            @Override public void onReceivedHttpError(WebView view, WebResourceRequest request, WebResourceResponse response) {
+                if (view == primaryBrowser && active && request.isForMainFrame()) {
+                    pageFailed = true;
+                    pageState = "استجابة الصفحة HTTP " + response.getStatusCode();
+                    status.setText(pageState);
+                }
+            }
             @Override public boolean shouldOverrideUrlLoading(WebView view, WebResourceRequest request) {
                 return !isHttps(request.getUrl().toString());
             }
@@ -146,6 +212,9 @@ public final class BrowserBridge {
             }
         });
         browser.setWebChromeClient(new WebChromeClient() {
+            @Override public void onProgressChanged(WebView view, int value) {
+                if (view == primaryBrowser && active && progress != null) progress.setProgress(value);
+            }
             @Override public boolean onCreateWindow(WebView view, boolean isDialog, boolean userGesture, Message result) {
                 if (!userGesture || !active || windows.size() >= 3) return false;
                 WebView popup = browser();
@@ -170,9 +239,16 @@ public final class BrowserBridge {
         return browser;
     }
     private Dialog show(WebView browser, View content, boolean primary) {
-        Dialog dialog = new Dialog(activity);
+        Dialog dialog = new Dialog(activity, android.R.style.Theme_Material_NoActionBar);
         dialog.requestWindowFeature(Window.FEATURE_NO_TITLE);
-        dialog.setContentView(content);
+        dialog.setContentView(content, new ViewGroup.LayoutParams(-1, -1));
+        dialog.setOnKeyListener((ignored, keyCode, event) -> {
+            if (keyCode == android.view.KeyEvent.KEYCODE_BACK && event.getAction() == android.view.KeyEvent.ACTION_UP && browser.canGoBack()) {
+                browser.goBack();
+                return true;
+            }
+            return false;
+        });
         windows.put(browser, dialog);
         dialog.setOnDismissListener(ignored -> {
             if (primary) finish(null, "اتقفل اختبار المتصفح.");
@@ -200,10 +276,23 @@ public final class BrowserBridge {
         button.setText("فحص وتشغيل مرشح " + candidates.size() + " • " + Uri.parse(url).getHost() + (hls ? " • HLS" : " • MP4"));
         button.setOnClickListener(v -> validate(media));
         buttons.add(button);
-        choices.addView(button);
-        status.setText("ظهر " + candidates.size() + " مرشح فيديو. ممكن يكون إعلان. بعد ما يبدأ العمل في الموقع، اختار مرشحه للفحص ثم التشغيل في التطبيق.");
+        choices.addView(button, new LinearLayout.LayoutParams(dp(250), dp(56)));
+        candidateStrip.setVisibility(View.VISIBLE);
+        button.setTextSize(12);
+        button.setMaxLines(2);
+        status.setText("مرشحات: " + candidates.size() + " • ممكن تشمل إعلانات");
+    }
+    private void showHelp() {
+        if (!active || (helpDialog != null && helpDialog.isShowing())) return;
+        helpDialog = new AlertDialog.Builder(activity)
+            .setTitle("اختبار المتصفح v2")
+            .setMessage("الحالة: " + pageState + "\nمرشحات الفيديو: " + candidates.size() + "\n\nاختار العمل من الموقع وكمل التحقق بنفسك. شريط المرشحات مش بيظهر إلا لما يرصد رابط فيديو؛ المرشح ممكن يكون إعلان. اختار مرشح العمل فقط. لو الموقع عرض حظر مستمر، اقفل الاختبار وابعت صورة أول مرحلة بدل تكرار المحاولة. تحميل مستند الصفحة مش إثبات نجاح التحقق أو التشغيل.")
+            .setPositiveButton("رجوع للموقع", null).create();
+        helpDialog.setOnDismissListener(ignored -> helpDialog = null);
+        helpDialog.show();
     }
     private void validate(Media media) {
+        if (!active) return;
         for (Button button : buttons) button.setEnabled(false);
         status.setText("بفحص نوع استجابة الرابط المختار، مش هنبعت رابط HTML للمشغل.");
         worker.execute(() -> {
@@ -247,6 +336,7 @@ public final class BrowserBridge {
                 if (!active) return;
                 if (result == null) finish(media, null);
                 else {
+                    pageState = result;
                     status.setText(result);
                     for (Button button : buttons) button.setEnabled(true);
                 }
@@ -262,6 +352,10 @@ public final class BrowserBridge {
         Listener callback = listener;
         listener = null;
         active = false;
+        if (helpDialog != null) {
+            helpDialog.dismiss();
+            helpDialog = null;
+        }
         main.removeCallbacks(timeout);
         activity.getApplication().unregisterActivityLifecycleCallbacks(lifecycle);
         HttpsURLConnection connection = checking;
