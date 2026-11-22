@@ -2,7 +2,6 @@ package com.example
 
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.AppUtils.parseJson
-import com.lagradost.cloudstream3.utils.AppUtils.parsedSafe
 import com.lagradost.cloudstream3.utils.ExtractorLink
 import com.lagradost.cloudstream3.utils.loadExtractor
 import org.jsoup.nodes.Element
@@ -158,8 +157,9 @@ class Shahid4uProvider : MainAPI() {
                     cookies = cookies,
                     json = mapOf("key" to key, "token" to token, "human_signal" to null),
                 )
-                val resolved: ResolveResponse? = resp.parsedSafe<ResolveResponse>()
-                    ?: runCatching { parseJson<ResolveResponse>(resp.text) }.getOrNull()
+                val resolved: ResolveResponse? = runCatching {
+                    parseJson<ResolveResponse>(resp.text)
+                }.getOrNull()
                 val mUrl: String = resolved?.url?.takeIf { it.isNotBlank() } ?: return@runCatching
 
                 val mHtml: String = app.get(fixUrl(mUrl), referer = watchUrl, cookies = cookies).text
