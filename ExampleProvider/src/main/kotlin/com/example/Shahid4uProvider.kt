@@ -110,30 +110,38 @@ class Shahid4uProvider : MainAPI() {
         callback: (ExtractorLink) -> Unit
     ): Boolean {
         // data may be a /film/ or /episode/ page or a direct /watch/ page.
-        val pageCookies: Map<String, String>
+        // The site's /watch/resolve is bound to the Laravel session cookie and
+        // CloudStream keeps no cookie jar, so every step must carry the cookies
+        // collected from the previous one, like a browser session would.
+        val sessionCookies = mutableMapOf<String, String>()
+
+        val rootResp = app.get(mainUrl)
+        sessionCookies.putAll(rootResp.cookies)
+
         val watchUrl: String
         if (data.contains("/watch/")) {
             watchUrl = data
-            pageCookies = emptyMap()
         } else {
-            val pageResp = app.get(data)
-            pageCookies = pageResp.cookies
+            val pageResp = app.get(data, referer = mainUrl, cookies = sessionCookies)
+            sessionCookies.putAll(pageResp.cookies)
             val href: String? = pageResp.document.select("a")
                 .firstOrNull { it.text().trim() == "مشاهدة الآن" }
                 ?.attr("href")
-            if (href.isNullOrBlank()) return false
+            if (href.isNullOrBlank()) {
+                throw ErrorLoadingException("Shahid4u: watch button not found on content page")
+            }
             watchUrl = fixUrl(href)
         }
 
-        val watchResp = app.get(watchUrl, referer = data, cookies = pageCookies)
-        val cookies: Map<String, String> = pageCookies + watchResp.cookies
+        val watchResp = app.get(watchUrl, referer = data, cookies = sessionCookies)
+        sessionCookies.putAll(watchResp.cookies)
         val watchHtml: String = watchResp.text
         val doc = watchResp.document
 
         val csrf: String = Regex("csrfToken\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
-            ?: return false
+            ?: throw ErrorLoadingException("Shahid4u: watch page missing player tokens (protection or layout change)")
         val key: String = Regex("watchResolveKey\\s*=\\s*\"([^\"]+)\"").find(watchHtml)?.groupValues?.get(1)
-            ?: return false
+            ?: throw ErrorLoadingException("Shahid4u: watch page missing resolve key")
 
         val servers: List<Pair<String, String>> = doc.select("button.btn-server").mapNotNull { b: Element ->
             val token: String = b.attr("data-token")
@@ -141,9 +149,10 @@ class Shahid4uProvider : MainAPI() {
             val serverName: String = b.selectFirst("img")?.attr("title")?.trim().orEmpty()
             serverName to token
         }
-        if (servers.isEmpty()) return false
+        if (servers.isEmpty()) throw ErrorLoadingException("Shahid4u: no servers listed on watch page")
 
         var found = false
+        var rejected = 0
         servers.forEach { (serverName, token) ->
             runCatching {
                 val resp = app.post(
@@ -154,21 +163,28 @@ class Shahid4uProvider : MainAPI() {
                         "Accept" to "application/json",
                     ),
                     referer = watchUrl,
-                    cookies = cookies,
+                    cookies = sessionCookies,
                     json = mapOf("key" to key, "token" to token, "human_signal" to null),
                 )
                 val resolved: ResolveResponse? = runCatching {
                     parseJson<ResolveResponse>(resp.text)
                 }.getOrNull()
-                val mUrl: String = resolved?.url?.takeIf { it.isNotBlank() } ?: return@runCatching
+                val mUrl: String? = resolved?.url?.takeIf { it.isNotBlank() }
+                if (mUrl == null) {
+                    rejected++
+                    return@runCatching
+                }
 
-                val mHtml: String = app.get(fixUrl(mUrl), referer = watchUrl, cookies = cookies).text
+                val mHtml: String = app.get(fixUrl(mUrl), referer = watchUrl, cookies = sessionCookies).text
                 val embed: String = Regex("iframe src=\"(https?://[^\"]+)\"").find(mHtml)?.groupValues?.get(1)
                     ?: return@runCatching
 
                 found = true
                 loadExtractor(embed, watchUrl, subtitleCallback, callback)
             }
+        }
+        if (!found) {
+            throw ErrorLoadingException("Shahid4u: site rejected all server resolves ($rejected/${servers.size})")
         }
         return found
     }
