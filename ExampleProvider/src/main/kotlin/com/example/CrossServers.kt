@@ -28,7 +28,7 @@ object CrossServerSettings {
  * Any sibling that fails, times out or has no confident match is skipped.
  */
 object CrossServers {
-    private const val PER_SITE_TIMEOUT_MS = 10_000L
+    private const val PER_SITE_TIMEOUT_MS = 15_000L
     private const val SEARCH_CANDIDATES = 5
 
     private val noise = listOf(
