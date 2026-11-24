@@ -13,7 +13,30 @@ class MyCimaProvider : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/movies/" to "أفلام",
-        "$mainUrl/tvshows/" to "مسلسلات"
+        "$mainUrl/tvshows/" to "مسلسلات",
+        "$mainUrl/genres/%d8%af%d8%b1%d8%a7%d9%85%d8%a7/" to "دراما",
+        "$mainUrl/genres/%d8%a5%d8%ab%d8%a7%d8%b1%d8%a9/" to "إثارة",
+        "$mainUrl/genres/%d9%83%d9%88%d9%85%d9%8a%d8%af%d9%8a%d8%a7/" to "كوميديا",
+        "$mainUrl/genres/%d8%ac%d8%b1%d9%8a%d9%85%d8%a9/" to "جريمة",
+        "$mainUrl/genres/%d8%ad%d8%b1%d9%83%d8%a9/" to "حركة",
+        "$mainUrl/genres/%d8%ba%d9%85%d9%88%d8%b6/" to "غموض",
+        "$mainUrl/genres/%d8%b1%d8%b3%d9%88%d9%85-%d9%85%d8%aa%d8%ad%d8%b1%d9%83%d8%a9/" to "رسوم متحركة",
+        "$mainUrl/genres/%d8%b1%d9%88%d9%85%d9%86%d8%b3%d9%8a%d8%a9/" to "رومنسية",
+        "$mainUrl/genres/%d8%b1%d8%b9%d8%a8/" to "رعب",
+        "$mainUrl/genres/%d8%ae%d9%8a%d8%a7%d9%84-%d8%b9%d9%84%d9%85%d9%8a-%d9%88%d9%81%d8%a7%d9%86%d8%aa%d8%a7%d8%b2%d9%8a%d8%a7/" to "خيال علمي وفانتازيا",
+        "$mainUrl/genres/%d8%b9%d8%a7%d8%a6%d9%84%d9%8a/" to "عائلي",
+        "$mainUrl/genres/%d9%85%d8%ba%d8%a7%d9%85%d8%b1%d8%a9/" to "مغامرة",
+        "$mainUrl/genres/%d9%81%d8%a7%d9%86%d8%aa%d8%a7%d8%b2%d9%8a%d8%a7/" to "فانتازيا",
+        "$mainUrl/genres/%d8%ae%d9%8a%d8%a7%d9%84-%d8%b9%d9%84%d9%85%d9%8a/" to "خيال علمي",
+        "$mainUrl/genres/%d9%88%d8%ab%d8%a7%d8%a6%d9%82%d9%8a/" to "وثائقي",
+        "$mainUrl/genres/%d8%ad%d8%b1%d9%83%d8%a9-%d9%88%d9%85%d8%ba%d8%a7%d9%85%d8%b1%d8%a9/" to "حركة ومغامرة",
+        "$mainUrl/genres/%d8%aa%d8%a7%d8%b1%d9%8a%d8%ae/" to "تاريخ",
+        "$mainUrl/genres/%d8%ad%d8%b1%d8%a8/" to "حرب",
+        "$mainUrl/genres/%d9%85%d9%88%d8%b3%d9%8a%d9%82%d9%89/" to "موسيقى",
+        "$mainUrl/genres/%d8%ba%d8%b1%d8%a8%d9%8a/" to "غربي",
+        "$mainUrl/genres/%d9%81%d9%8a%d9%84%d9%85-%d8%aa%d9%84%d9%81%d8%a7%d8%b2%d9%8a/" to "فيلم تلفازي",
+        "$mainUrl/genres/%d9%88%d8%a7%d9%82%d8%b9/" to "واقع",
+        "$mainUrl/genres/%d8%a3%d9%88%d8%a8%d8%b1%d8%a7-%d8%b5%d8%a7%d8%a8%d9%88%d9%86%d9%8a%d8%a9/" to "أوبرا صابونية"
     )
 
     private fun String.getImageURL(): String? {
@@ -40,7 +63,10 @@ class MyCimaProvider : MainAPI() {
         val posterUrl = selectFirst("span.BG--GridItem")?.attr("data-src")?.ifBlank { null }
             ?: selectFirst("meta[itemprop=thumbnailUrl]")?.attr("content")
 
+        val kind = selectFirst("strong small")?.text().orEmpty()
         val tvType = when {
+            kind.contains("مسلسل") -> TvType.TvSeries
+            kind.contains("فيلم") -> TvType.Movie
             fullTitle.contains("انمي") || fullTitle.contains("أنمي") -> TvType.Anime
             fullTitle.contains("فيلم") -> TvType.Movie
             else -> TvType.TvSeries
