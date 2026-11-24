@@ -1,0 +1,8 @@
+{
+  "name": "Kemo StreamPlay (experimental)",
+  "description": "Experimental StreamPlay port, separate from the stable repository",
+  "manifestVersion": 1,
+  "pluginLists": [
+    "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/streamplay-experimental-builds/plugins.json"
+  ]
+}

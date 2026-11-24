@@ -1,0 +1,24 @@
+[
+  {
+    "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Korduene_Logo.png",
+    "fileHash": "sha256-f3954697decdf4f3d2c3fcc9b2956b5e76cd8eb9c4af63b2af23eab40da92d2f",
+    "apiVersion": 1,
+    "repositoryUrl": "https://github.com/kemo1111/MyPrivateCinema",
+    "fileSize": 969869,
+    "status": 1,
+    "language": "en",
+    "authors": [
+      "Kemo"
+    ],
+    "tvTypes": [
+      "Movie",
+      "TvSeries",
+      "Anime"
+    ],
+    "version": 653,
+    "internalName": "StreamPlayPort",
+    "description": "EXPERIMENTAL StreamPlay port (v653 source, blank API keys). Only tested route: anime via Animex. Film/TV sources untested or not producing links.",
+    "name": "StreamPlayPort (experimental)",
+    "url": "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/streamplay-experimental-builds/StreamPlayPort.cs3"
+  }
+]
