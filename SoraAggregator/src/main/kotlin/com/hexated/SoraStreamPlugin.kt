@@ -8,6 +8,13 @@ import android.content.Context
 @CloudstreamPlugin
 class SoraStreamPlugin: Plugin() {
     override fun load(context: Context) {
+        TmdbKey.init(context)
+        openSettings = { ctx ->
+            android.os.Handler(android.os.Looper.getMainLooper()).post {
+                val host = com.lagradost.cloudstream3.CommonActivity.activity ?: ctx
+                TmdbSettingsDialog.build(host).show()
+            }
+        }
         // All providers should be added in this manner. Please don't edit the providers list directly.
         registerMainAPI(SoraStream())
         registerMainAPI(SoraStreamLite())

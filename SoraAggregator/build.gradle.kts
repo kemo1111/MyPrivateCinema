@@ -29,3 +29,13 @@ cloudstream {
 dependencies {
     implementation("org.jetbrains.kotlinx:kotlinx-coroutines-core:1.8.1")
 }
+
+dependencies {
+    testImplementation("junit:junit:4.13.2")
+    testImplementation("org.robolectric:robolectric:4.18.1")
+    testImplementation(files(System.getProperty("user.home") + "/.gradle/caches/cloudstream/cloudstream/cloudstream.jar"))
+}
+tasks.withType<Test>().configureEach {
+    maxHeapSize = "512m"
+    // Pass the preview output directory
+}
