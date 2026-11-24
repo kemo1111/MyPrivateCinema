@@ -356,6 +356,16 @@ class ArabSeedProvider : MainAPI() {
             }
         }
 
+        // Same film from the other sites in this plugin (movies only, can be switched off in settings)
+        runCatching {
+            if (CrossServerSettings.isEnabled()) {
+                val movie = load(data) as? MovieLoadResponse
+                if (movie != null) {
+                    CrossServers.addSiblingServers(this, movie.name, movie.year, subtitleCallback, callback)
+                }
+            }
+        }
+
         return true
     }
 
