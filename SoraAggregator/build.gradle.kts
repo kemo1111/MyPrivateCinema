@@ -32,6 +32,9 @@ dependencies {
 
 dependencies {
     testImplementation("junit:junit:4.13.2")
+    testImplementation("dev.whyoleg.cryptography:cryptography-core:0.4.0")
+    testRuntimeOnly("dev.whyoleg.cryptography:cryptography-provider-jdk:0.4.0")
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
     testImplementation("org.robolectric:robolectric:4.18.1")
     testImplementation(files(System.getProperty("user.home") + "/.gradle/caches/cloudstream/cloudstream/cloudstream.jar"))
 }
