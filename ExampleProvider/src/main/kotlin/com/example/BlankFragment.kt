@@ -78,6 +78,12 @@ class BlankFragment(private val plugin: ExamplePlugin) : BottomSheetDialogFragme
             TextViewCompat.setTextAppearance(this, R.style.ResultInfoText)
         }
 
+        (view as? ViewGroup)?.addView(android.widget.Switch(view.context).apply {
+            text = "دمج سيرفرات نفس الفيلم من باقي المواقع (من عرب سيد)"
+            isChecked = CrossServerSettings.isEnabled()
+            setOnCheckedChangeListener { _, checked -> CrossServerSettings.setEnabled(checked) }
+        })
+
         textView2?.text = view.context.resources.getText(R.string.legal_notice_text)
 
         // Set image resources and tint if the views are found

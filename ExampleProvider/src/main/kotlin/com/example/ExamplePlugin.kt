@@ -11,6 +11,7 @@ class ExamplePlugin: Plugin() {
 
     override fun load(context: Context) {
         activity = context as? AppCompatActivity
+        CrossServerSettings.appContext = context.applicationContext
 
         // All providers should be added in this manner
         registerMainAPI(ExampleProvider())
