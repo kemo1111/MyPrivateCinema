@@ -72,7 +72,7 @@ class TmdbSettingsLandscapeTest {
         dialog.show()
         ShadowLooper.idleMainLooper()
         val root = dialog.window!!.decorView
-        layout(root, 560, 300)
+        layout(root, 560, 700)
         val input = root.findViewWithTag<EditText>("tmdb_key_input")
         val status = root.findViewWithTag<TextView>("tmdb_key_status")
         val logo = root.findViewWithTag<ImageView>("tmdb_logo")
@@ -95,7 +95,7 @@ class TmdbSettingsLandscapeTest {
         assertTrue(status.text.toString().startsWith("A key is saved"))
         // the saved key itself is never shown in the dialog
         assertFalse(allText(root).contains(validKey))
-        layout(root, 560, 300)
+        layout(root, 560, 700)
         shot(root, "land-settings-saved.png", 560, 300)
 
         dialog.getButton(AlertDialog.BUTTON_NEUTRAL).performClick()

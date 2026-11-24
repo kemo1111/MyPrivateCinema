@@ -9,3 +9,11 @@ Not done: automated tests, visual check of the settings dialog, source-by-source
 Providers that needed private keys (Ghostx, CinemaTV, SFMovies, Zshow, Dump, Crunchyroll) have blank values and are expected to return nothing.
 
 This product uses TMDB and the TMDB APIs but is not endorsed, certified, or otherwise approved by TMDB.
+
+## Source probe (one run, 2026-11-24, one sandbox IP, fixture: The Matrix tmdb 603 / tt0133093)
+Run through the plugin's own extractor code (LiveProbeTest, off by default). Results are one snapshot, not a ranking.
+- moflix: returned 1 HLS link (HTTP 200 on the playlist URL). Playback not tested.
+- vidsrc.to, 2embed, watchsomuch: reached the site, returned no link (scraping logic may be out of date).
+- vidsrc.me: parse error (empty iframe URL). zoechip: connection dropped.
+- allmovieland, showflix, dahmer: host name did not resolve. nowtv, uhdmovies: connect timeout.
+All stay in the code as candidates.
