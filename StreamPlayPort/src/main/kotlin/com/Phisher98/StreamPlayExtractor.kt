@@ -2090,7 +2090,7 @@ object StreamPlayExtractor : StreamPlay() {
         callback: (ExtractorLink) -> Unit
     ) {
         return // disabled in this build: provider asks not to be scraped; access authority absent
-        val secret = base64Decode("cGxlYXNlZG9udHNjcmFwZW1lc2F5d2FsbGFoaQ==")
+        val secret = ""
         val keyBytes = secret.padEnd(32, '\u0000').toByteArray(Charsets.UTF_8)
         val defaultReferer = "https://player.vidzee.wtf/"
 
