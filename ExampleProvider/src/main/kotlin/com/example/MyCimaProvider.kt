@@ -5,7 +5,7 @@ import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
 
 class MyCimaProvider : MainAPI() {
-    override var mainUrl = "https://wecimas.watch"
+    override var mainUrl = "https://wecimas.live"
     override var name = "MyCima Kemo"
     override val hasMainPage = true
     override var lang = "ar"
@@ -13,9 +13,7 @@ class MyCimaProvider : MainAPI() {
 
     override val mainPage = mainPageOf(
         "$mainUrl/movies/" to "أفلام",
-        "$mainUrl/category/series/" to "مسلسلات",
-        "$mainUrl/category/anime/" to "أنمي",
-        "$mainUrl/category/wwe/" to "مصارعة"
+        "$mainUrl/tvshows/" to "مسلسلات"
     )
 
     private fun String.getImageURL(): String? {
@@ -145,7 +143,13 @@ class MyCimaProvider : MainAPI() {
         val document = app.get(data).document
         val embedUrls = mutableListOf<String>()
 
-        // سيرفرات المشاهدة: روابط مشفرة Base64 داخل ul#watch
+        // التصميم الجديد: أزرار السيرفرات button.mc-server-btn فيها data-url مباشر
+        document.select("button.mc-server-btn[data-url]").forEach { b ->
+            val u = b.attr("data-url")
+            if (u.startsWith("http")) embedUrls.add(u)
+        }
+
+        // التصميم القديم: روابط مشفرة Base64 داخل ul#watch
         document.select("ul#watch li[data-encoded]").forEach { li ->
             val decoded = try {
                 base64Decode(li.attr("data-encoded"))
