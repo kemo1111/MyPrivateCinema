@@ -4129,7 +4129,20 @@ object StreamPlayExtractor : StreamPlay() {
         }.getOrNull() ?: return
 
         val stream = data.stream
-        val m3u8 = stream.playlist
+        // Current vidlink responses carry direct file qualities instead of a playlist.
+        // Media playback of these hosts is unverified (CDN answered 428/429 off-device).
+        stream.qualities?.forEach { (q, v) ->
+            val fileUrl = v.url ?: return@forEach
+            if (v.requiresProxy == true) return@forEach
+            callback.invoke(
+                newExtractorLink("Vidlink", "Vidlink $q", fileUrl, INFER_TYPE) {
+                    this.referer = "$vidlink/"
+                    this.quality = q.toIntOrNull() ?: Qualities.Unknown.value
+                    this.headers = mapOf("Origin" to vidlink, "Referer" to "$vidlink/")
+                }
+            )
+        }
+        val m3u8 = stream.playlist ?: return
 
         val headersJson = Regex("""[?&]headers=([^&]+)""")
             .find(m3u8)?.groupValues?.get(1)

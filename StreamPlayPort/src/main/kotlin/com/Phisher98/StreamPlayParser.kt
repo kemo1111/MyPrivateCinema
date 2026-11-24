@@ -608,7 +608,14 @@ data class VidlinkResponse(
 )
 
 data class VidlinkStream(
-    @SerializedName("playlist") val playlist: String
+    @SerializedName("playlist") val playlist: String? = null,
+    @SerializedName("qualities") val qualities: Map<String, VidlinkQuality>? = null
+)
+
+data class VidlinkQuality(
+    @SerializedName("type") val type: String? = null,
+    @SerializedName("url") val url: String? = null,
+    @SerializedName("requiresProxy") val requiresProxy: Boolean? = null
 )
 
 data class VidFastRes(
