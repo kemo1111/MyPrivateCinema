@@ -28,7 +28,7 @@ object CrossServerSettings {
  * Any sibling that fails, times out or has no confident match is skipped.
  */
 object CrossServers {
-    private const val PER_SITE_TIMEOUT_MS = 15_000L
+    private const val PER_SITE_TIMEOUT_MS = 10_000L
     private const val SEARCH_CANDIDATES = 5
 
     private val noise = listOf(
@@ -99,9 +99,10 @@ object CrossServers {
                 }
             }.awaitAll()
         }
+        val seen = HashSet<String>()
         for (r in results) {
             val (site, links) = r ?: continue
-            links.forEach { callback(tag(it, site)) }
+            links.forEach { if (seen.add(it.url)) callback(tag(it, site)) }
         }
     }
 
@@ -113,7 +114,6 @@ object CrossServers {
     ): Pair<String, List<ExtractorLink>>? {
         val hits = api.search(title)?.take(SEARCH_CANDIDATES) ?: return null
         for (hit in hits) {
-            if (hit.type != null && hit.type != TvType.Movie) continue
             if (!sameFilm(title, year, hit.name, yearInText(hit.name))) continue
             val resp = api.load(hit.url) as? MovieLoadResponse ?: continue
             if (!sameFilm(title, year, resp.name, resp.year)) continue
