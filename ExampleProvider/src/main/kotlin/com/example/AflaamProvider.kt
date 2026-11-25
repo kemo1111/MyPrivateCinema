@@ -69,7 +69,7 @@ class AflaamProvider : MainAPI() {
                     this.name = it.selectFirst("h3.entry-title")?.text()?.replaceFirst(Regex("^\\d+"), "")?.trim()
                     this.episode = n
                 }
-            }.distinctBy { it.data }.reversed()
+            }.distinctBy { it.data }.sortedWith(compareBy({ it.episode == null }, { it.episode ?: 0 }))
             return newTvSeriesLoadResponse(title, url, TvType.TvSeries, eps) {
                 this.posterUrl = poster; this.year = year; this.plot = plot; this.tags = tags
             }
@@ -80,6 +80,15 @@ class AflaamProvider : MainAPI() {
     }
 
     override suspend fun loadLinks(
+        data: String,
+        isCasting: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
+    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
+        loadLinksOwn(data, isCasting, sub, cb)
+    }
+
+    private suspend fun loadLinksOwn(
         data: String,
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,

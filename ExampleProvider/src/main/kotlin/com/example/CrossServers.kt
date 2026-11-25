@@ -57,6 +57,14 @@ object CrossServers {
         return t.replace(Regex("\\s+"), " ")
     }
 
+    /** Search text without site wording or year, keeping the original letters. */
+    fun searchQuery(title: String): String {
+        var t = title.replace(Regex("\\(?\\b(19|20)\\d{2}\\b\\)?"), " ")
+        for (n in noise) t = t.replace(Regex(Regex.escape(n), RegexOption.IGNORE_CASE), " ")
+        t = t.replace(Regex("\\s+"), " ").trim()
+        return if (t.isEmpty()) title else t
+    }
+
     /** True only when the normalized titles are equal and the years do not contradict. */
     fun sameFilm(titleA: String, yearA: Int?, titleB: String, yearB: Int?): Boolean {
         val a = normalize(titleA)
@@ -148,7 +156,7 @@ object CrossServers {
         year: Int?,
         subtitleCallback: (SubtitleFile) -> Unit
     ): Pair<String, List<ExtractorLink>>? {
-        val hits = api.search(title)?.take(SEARCH_CANDIDATES) ?: return null
+        val hits = api.search(searchQuery(title))?.take(SEARCH_CANDIDATES) ?: return null
         for (hit in hits) {
             if (!sameFilm(title, year, hit.name, yearInText(hit.name))) continue
             val resp = api.load(hit.url) as? MovieLoadResponse ?: continue
