@@ -16,6 +16,7 @@ import com.lagradost.cloudstream3.utils.schemaStripRegex
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeStreamLinkHandlerFactory
+import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.SubtitlesStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -60,7 +61,8 @@ open class YoutubeExtractor : ExtractorApi() {
         val bitrate: Int,
         val initRange: String?,
         val indexRange: String?,
-        val language: String
+        val language: String,
+        val trackType: AudioTrackType?
     )
 
     override suspend fun getUrl(
@@ -109,10 +111,14 @@ open class YoutubeExtractor : ExtractorApi() {
 
                         val initR = if (asr.initStart != null && asr.initEnd != null) "${asr.initStart}-${asr.initEnd}" else null
                         val indexR = if (asr.indexStart != null && asr.indexEnd != null) "${asr.indexStart}-${asr.indexEnd}" else null
-                        var rawLang = asr.audioTrackId ?: "Default"
+                        // v10 review fix: language comes from the dub track id, else from the
+                        // stream's real locale (lets the ORIGINAL track carry its true language,
+                        // so an explicit original pick persists like any language); "Default"
+                        // only when NewPipe exposes neither.
+                        var rawLang = asr.audioTrackId ?: asr.audioLocale?.toLanguageTag() ?: "Default"
                         if (rawLang.contains(".")) rawLang = rawLang.substringBefore(".") // يحول fr.3 إلى fr
 
-                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase())
+                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase(), asr.audioTrackType)
                     } catch (e: Exception) { null }
                 }.distinctBy { it.url }
                 val audiosByLanguage = audioInfoList.groupBy { it.language }
@@ -121,40 +127,54 @@ open class YoutubeExtractor : ExtractorApi() {
                 } catch (e: Exception) { }
                 startServerIfNeeded()
 
+                // v10 (user request 14471683/14474290): ONE DASH link per quality carrying ALL
+                // detected audio tracks; audio is chosen from the player's own audio menu, and
+                // a quality switch no longer changes the language (app re-applies the persisted
+                // preferred audio language on track change, keyed off the manifest lang attrs).
+                // Original track(s) come first; original = NewPipe AudioTrackType.ORIGINAL or no
+                // multi-audio metadata (single default track).
+                val originalLangs = audiosByLanguage.filterValues { streams ->
+                    streams.any { it.trackType == AudioTrackType.ORIGINAL || it.trackType == null }
+                }.keys
+                val orderedLangs = originalLangs.toList() +
+                    listOf("AR", "EN").filter { it !in originalLangs && it in audiosByLanguage.keys } +
+                    audiosByLanguage.keys.filter { it !in originalLangs && it != "AR" && it != "EN" }
+
                 for (video in videoOnlyList) {
                     if (audiosByLanguage.isNotEmpty()) {
-                        for ((lang, audios) in audiosByLanguage) {
-                            val bestAudioForLang = if (video.mimeType.contains("webm")) {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
+                        val selectedAudios = orderedLangs.mapNotNull { lang ->
+                            val audios = audiosByLanguage[lang] ?: return@mapNotNull null
+                            if (video.mimeType.contains("webm")) {
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
                             } else {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
                             }
+                        }
 
-                            if (bestAudioForLang != null) {
-                                val singleAudioList = listOf(bestAudioForLang)
-                                val dashXml = buildDashManifestXml(video, singleAudioList, durationSeconds)
-                                val localLink = registerManifestAndGetUrl(dashXml)
+                        if (selectedAudios.isNotEmpty()) {
+                            val dashXml = buildDashManifestXml(video, selectedAudios, durationSeconds)
+                            val localLink = registerManifestAndGetUrl(dashXml)
 
-                                if (localLink != null) {
-                                    val finalName = "${video.label} ($lang) ${video.label}"
-
-                                    builtLinks.add(
-                                        newExtractorLink(
-                                            this.name,
-                                            finalName,
-                                            localLink,
-                                            type = ExtractorLinkType.DASH
-                                        ) {
-                                            this.referer = mainUrl
-                                            this.quality = video.height
-                                        }
-                                    )
-                                }
+                            if (localLink != null) {
+                                builtLinks.add(
+                                    newExtractorLink(
+                                        this.name,
+                                        "source",
+                                        localLink,
+                                        type = ExtractorLinkType.DASH
+                                    ) {
+                                        this.referer = mainUrl
+                                        this.quality = video.height
+                                    }
+                                )
                             }
                         }
                     }
                 }
-                val muxedList = (s.videoStreams ?: emptyList()).mapNotNull { vs ->
+                // v10 review fix: muxed legacy links carry only the original combined audio, so
+                // offering them alongside DASH would silently reset a user-chosen dub on a source
+                // switch. Emit them only as a fallback when no DASH link could be built at all.
+                val muxedList = if (builtLinks.isEmpty()) (s.videoStreams ?: emptyList()).mapNotNull { vs ->
                     try {
                         val mUrl = vs.content ?: return@mapNotNull null
                         if (!seenUrls.add(mUrl)) return@mapNotNull null
@@ -162,10 +182,10 @@ open class YoutubeExtractor : ExtractorApi() {
                         val height = runCatching { vs.height ?: 0 }.getOrNull() ?: 0
                         Triple(mUrl, label, height)
                     } catch (e: Exception) { null }
-                }
-                for ((mUrl, mLabel, mHeight) in muxedList) {
+                } else emptyList()
+                for ((mUrl, _, mHeight) in muxedList) {
                     builtLinks.add(
-                        newExtractorLink(this.name, "$mLabel (Legacy)", mUrl, type = INFER_TYPE) {
+                        newExtractorLink(this.name, "source (legacy)", mUrl, type = INFER_TYPE) {
                             this.referer = mainUrl
                             this.quality = mHeight
                         }
@@ -273,12 +293,26 @@ open class YoutubeExtractor : ExtractorApi() {
             val aMime = audio.mimeType
             val aCodecs = if (aMime.contains("webm")) "opus" else "mp4a.40.2"
 
+            // v10: real audio-track metadata so the player's audio menu lists languages and the
+            // language survives a quality switch (app persists preferredAudioTrackLanguage and
+            // re-applies it on track change). lang only for real 2-letter codes; the original
+            // (first) track gets Role main, dubs get dub.
+            // BCP-47: keep full regional tags (pt-BR vs pt-PT are distinct dubs); only a real
+            // language tag gets the lang attribute, the original/default track gets none.
+            val norm = audio.language.lowercase()
+            val aLang = norm.takeIf { it.matches(Regex("^[a-z]{2,3}(-[a-z0-9]{2,8})*$")) }
+            val langAttr = if (aLang != null) " lang=\"$aLang\"" else ""
+            val role = if (index == 0) "main" else "dub"
+            val label = if (audio.trackType == AudioTrackType.ORIGINAL || audio.trackType == null) "source" else (aLang ?: "audio")
+
             val aSegmentBase = if (audio.initRange != null && audio.indexRange != null) {
                 """<SegmentBase indexRange="${audio.indexRange}"><Initialization range="${audio.initRange}" /></SegmentBase>"""
             } else ""
 
             sb.append("""
-                <AdaptationSet mimeType="$aMime" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+                <AdaptationSet mimeType="$aMime"$langAttr subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+                  <Role schemeIdUri="urn:mpeg:dash:role:2011" value="$role"/>
+                  <Label>$label</Label>
                   <Representation id="$audioId" bandwidth="${if(audio.bitrate>0) audio.bitrate else 128000}" codecs="$aCodecs">
                     <BaseURL>$cleanAudioUrl</BaseURL>
                     $aSegmentBase

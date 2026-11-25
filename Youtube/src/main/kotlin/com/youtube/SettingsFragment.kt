@@ -104,6 +104,7 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
         private lateinit var homeCategory: PreferenceCategory
         private lateinit var manageChannelsPref: Preference
         private lateinit var trendingPref: SwitchPreferenceCompat
+        private lateinit var historyPref: SwitchPreferenceCompat
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             val ctx = requireContext()
@@ -117,6 +118,18 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
                 setDefaultValue(true)
             }
             homeCategory.addPreference(trendingPref)
+
+            // v10: explicit sharedPref write so the provider (which reads the plugin's own
+            // SharedPreferences) sees the toggle, same pattern as the auth settings below.
+            historyPref = SwitchPreferenceCompat(ctx).apply {
+                key = "show_history_home"
+                isChecked = sharedPref.getBoolean("show_history_home", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("show_history_home", newVal as Boolean).apply()
+                    true
+                }
+            }
+            homeCategory.addPreference(historyPref)
 
             manageChannelsPref = Preference(ctx).apply {
                 key = "manage_custom_channels"
@@ -245,6 +258,7 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
         private fun updateTexts() {
             homeCategory.title = Loc.getString(sharedPref, "home_section")
             trendingPref.title = Loc.getString(sharedPref, "trending")
+            historyPref.title = Loc.getString(sharedPref, "history_home")
             manageChannelsPref.title = Loc.getString(sharedPref, "manage_channels")
             manageChannelsPref.summary = Loc.getString(sharedPref, "manage_channels_sum")
 
