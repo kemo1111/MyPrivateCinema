@@ -1,0 +1,197 @@
+<HTML>
+<HEAD>
+<meta content='width=device-width,initial-scale=1.0,minimum-scale=1.0,maximum-scale=1.0' name='viewport'/>
+<link rel="stylesheet" href="https://anafast.org/css/main.css">
+<script src="https://anafast.org/js/jquery.min.js"></script>
+<script src="https://anafast.org/js/xupload.js"></script>
+<script src="https://anafast.org/js/jquery.cookie.js"></script>
+<script>
+$.cookie('file_id', '309763', { expires: 10 });
+$.cookie('aff', '20', { expires: 10 });
+$.cookie('ref_url', 'ai.cimamix.tv', { expires: 10 });
+</script>
+</HEAD>
+<BODY topmargin=0 leftmargin=0 style="background:transparent;">
+
+
+
+
+    <div style="position:relative;">
+    
+
+          <div id="play_limit_box">
+            <a href="https://anafast.org/premium.html" target="_blank">Upgrade you account</a> to watch videos with no limits!
+          </div>
+
+    <script type='text/javascript' src='/player/jw8/jwplayer.js?v='></script>
+				<script type="text/javascript">jwplayer.key="Z8lq0BAJBEu//qi4oQ7e5kmmCB4pOlIsjYLVL95r9jE=";</script>
+				<style>
+					.jw-nextup-container{display:none !important; }
+					.jw-share-item, .jw-info-overlay-item, .jw-stats-item{display:none !important;}
+					.jw-display-icon-container .jw-icon-inline { display: none !important; } /*hide rewind+forward big buttons*/
+					.jw-button-container .jw-icon-rewind {display:none !important;}
+					.jw-display-icon-rewind { xdisplay: block !important; }
+					.jw-featured, .jw-rightclick { display:none !important; }
+				</style>
+				<script src="/js/localstorage-slim.js"></script>
+				<div id='vplayer' style="width:100%;height:100%;text-align:center;"><img src="https://afast-store3-umh.cdnz.quest/i/05/00061/fvvjhhhmigc3.jpg" style="width:100%;height:100%;"></div>
+
+    </div>
+
+
+
+
+<script type='text/javascript'>
+  jwplayer("vplayer").setup({
+    sources: [{file:"https://afast-store3-umh.cdnz.quest/hls2/05/00061/fvvjhhhmigc3_,l,n,.urlset/master.m3u8?t=1a0IqPtd-k1GvVh8hECPv1SSL9ENZSE27M1qoH324Xo&s=1795572801&e=18000&v=209748320&i=0.3&sp=0"}],
+    //withCredentials: true,
+    image: "https://afast-store3-umh.cdnz.quest/i/05/00061/fvvjhhhmigc3.jpg",
+    width: "100%", 
+    height: "100%",
+    stretching: "uniform",
+    duration: "5741.52",
+    fullscreenOrientationLock: "none",
+    //aspectratio: "16:9",
+    preload: 'auto',
+    //displayPlaybackLabel: true,
+    //horizontalVolumeSlider: true,
+    //allowFullscreen: false,
+    //"autoPause": { "viewability": true, "pauseAds": true },
+    //skin: {controlbar: {text:"#6F6", icons:"#6F6"}, timeslider:{progress:"#6F6"}, menus:{text:"#6F6"} },
+    //pipIcon: 'disabled',
+    androidhls: "true"
+    ,tracks: []
+    ,'qualityLabels':{"684":"Normal","396":"Low"},abouttext:"", aboutlink:"https://anafast.org",playbackRateControls: true, playbackRates: [0.5, 1, 2, 3]
+  });
+var vvplay,vvad;
+var vastdone1=0,vastdone2=0;
+var player = jwplayer();
+var prevt=0, tott=0, v2done=0, lastt=0;
+$.ajaxSetup({ headers: { 'Content-Cache': 'no-cache' } });
+player.on('time', function(x) { 
+    if(5>0 && x.position>=5 && vvad!=1){vvad=1;$('div.video_ad_fadein').fadeIn('slow');}
+    
+    if(x.position>=lastt+5 || x.position<lastt){ lastt=x.position; ls.set('ttfvvjhhhmigc3', Math.round(lastt), { ttl: 60*60*24*7 }); }
+});
+player.on('seek', function(x) { prevt=x.position; });
+player.on('play', function(x) { doPlay(x); });
+player.on('complete', function() { $('div.video_ad').show(); ls.remove('ttfvvjhhhmigc3'); });
+player.on('pause', function(x) {  });
+//player.on('all', function(x) { console.log(x); });
+player.on('bufferChange', function(x) { 
+	//console.log(x); 
+	if(x.fragNum==5) createCookieSec('vid','209748320',60*60*5);
+});
+
+function createCookieSec(name,value,sec) {
+	var date = new Date();
+	date.setTime(date.getTime()+(sec*1000));
+	document.cookie = name+"="+value+"; expires="+date.toGMTString()+"; domain=.anafast.org; path=/; SameSite=None; Secure";
+}
+
+function doPlay(x)
+{
+	$('div.video_ad').hide();
+	$('#over_player_msg').hide();
+	if(vvplay)return;
+	vvplay=1;
+	adb=0;
+	if( window.adbon == 1 ){ adb=1; }
+	if(''!=''){
+		$.get('/dl?op=view&view_id=209748320&hash=1795572801-30bde0beb84281bd320138563ddef37b&adb='+adb, function(data) {console.log('view:'+data);} );
+	}
+	var lastt = ls.get('ttfvvjhhhmigc3'); if(lastt>0){ jwplayer().seek( lastt ); }
+}
+
+function set_audio_track()
+{
+  var tracks=player.getAudioTracks(track_name);
+  console.log(tracks);
+  if(tracks.length>1){
+  	for(i=0;i<tracks.length;i++){ if(tracks[i].name==track_name){ console.log('!!='+i); player.setCurrentAudioTrack(i); } }
+  }
+}
+
+    player.on('ready', function(){
+    		
+    });
+
+jwplayer().addButton(
+    "/images/download2.png",
+    "Watch on site", 
+    function() {
+        //window.top.location.href = 'https://anafast.org/fvvjhhhmigc3.html';
+        var win = window.open('https://anafast.org/fvvjhhhmigc3.html', '_blank');
+  		win.focus();
+    },
+    "download11"
+);		player.on("audioTracks",function(event){
+			var tracks=player.getAudioTracks();
+			if(tracks.length<2)return;
+			$('.jw-settings-topbar-buttons').mousedown(function() { 
+			$('#jw-settings-submenu-audioTracks').removeClass('jw-settings-submenu-active');
+			$('.jw-submenu-audioTracks').attr('aria-expanded','false');
+		});
+		player.addButton("/images/dualy.svg","Audio Track",function(){
+			$('.jw-controls').toggleClass('jw-settings-open');
+			$('.jw-settings-captions, .jw-settings-playbackRates').attr('aria-checked','false');
+			if( $('.jw-controls').hasClass('jw-settings-open') ){ 
+				$('.jw-submenu-audioTracks').attr('aria-checked','true');
+				$('.jw-submenu-audioTracks').attr('aria-expanded','true');
+				$('.jw-settings-submenu-quality').removeClass('jw-settings-submenu-active');
+				$('.jw-settings-submenu-audioTracks').addClass('jw-settings-submenu-active');
+			}
+			else {
+				$('.jw-submenu-audioTracks').attr('aria-checked','false');
+				$('.jw-submenu-audioTracks').attr('aria-expanded','false');
+				$('.jw-settings-submenu-audioTracks').removeClass('jw-settings-submenu-active');
+			}
+		},"dualSound");
+		player.on("audioTrackChanged", function(event){ localStorage.setItem('default_audio',event.tracks[event.currentTrack].name);  });
+		if( localStorage.getItem('default_audio') ){ setTimeout("audio_set(localStorage.getItem('default_audio'));", 300 ); }
+		
+	});
+	var current_audio;
+	function audio_set(audio_name)
+	{
+		var tracks=player.getAudioTracks();
+		if(tracks.length>1){
+			for(i=0;i<tracks.length;i++){ if(tracks[i].name==audio_name){ if(i==current_audio){return;} current_audio=i; player.setCurrentAudioTrack(i); } }
+		}
+	}
+
+
+
+</script>
+
+
+
+
+<Script>
+$(function() {
+ 
+});
+</Script>
+
+<!-- First/Afst -->
+<script data-cfasync="false" async type="text/javascript" src="//pu.reelleggier.com/rnX0h3RvMGnW/138105"></script>
+<script>
+	(function(){try{var t=["sandbox","hasAttribute","frameElement","data","indexOf","href","domain","","plugins","undefined","namedItem","Chrome PDF Viewer","object","createElement","onerror","type","application/pdf","setAttribute","style","visibility:hidden;width:0;height:0;position:absolute;top:-99px;","data:application/pdf;base64,JVBERi0xLg0KdHJhaWxlcjw8L1Jvb3Q8PC9QYWdlczw8L0tpZHNbPDwvTWVkaWFCb3hbMCAwIDMgM10+Pl0+Pj4+Pj4=","appendChild","body","removeChild","parentElement","/embedblocked?referer=","substring","referrer"];function e(){setTimeout(function(){document.querySelectorAll("video").forEach(function(e){e.src="",e.load()});var e=document.createElement("div");e.style.position="fixed",e.style.top="0",e.style.left="0",e.style.width="100%",e.style.height="100%",e.style.backgroundColor="black",e.style.color="white",e.style.zIndex="9999",e.style.display="flex",e.style.justifyContent="center",e.style.alignItems="center",e.style.textAlign="center",e.innerHTML="<h2>Disable sandbox to play the video</h2>",document.body.appendChild(e);try{jwplayer().remove()}catch(e){}},900)}!function(n){try{if(window[t[2]][t[1]](t[0]))return void n()}catch(e){}if(0==location[t[5]][t[4]](t[3])||document[t[6]]!=t[7]){if("undefined"!=typeof navigator[t[8]]&&"undefined"!=typeof navigator[t[8]][t[10]]&&null!=navigator[t[8]][t[10]](t[11])){var o=document[t[13]](t[12]);o[t[14]]=function(){n()},o[t[17]](t[15],t[16]),o[t[17]](t[18],t[19]),o[t[17]](t[3],t[20]),document[t[22]][t[21]](o),setTimeout(function(){o[t[24]][t[23]](o)},150)}}else n()}(e),function(){try{document.domain=document.domain}catch(t){try{if(-1!=t.toString().toLowerCase().indexOf("sandbox"))return!0}catch(e){}}return!1}()&&e(),function(){if(window.parent===window)return!1;try{var e=window.frameElement}catch(t){e=null}return null===e?""===document.domain&&"data:"!==location.protocol:e.hasAttribute("sandbox")}()&&e()}catch(n){}})();
+	</script>
+<!-- Google tag (gtag.js) -->
+<script async src="https://www.googletagmanager.com/gtag/js?id=G-J7DZC2WYB0"></script>
+<script>
+  window.dataLayer = window.dataLayer || [];
+  function gtag(){dataLayer.push(arguments);}
+  gtag('js', new Date());
+
+  gtag('config', 'G-J7DZC2WYB0');
+</script>
+    
+
+
+
+
+
+
+</BODY></HTML>
