@@ -4,7 +4,6 @@
 // with mention of the original repository). Original repository: https://github.com/Abodabodd/re-3arabi
 package com.youtube
 
-import com.lagradost.cloudstream3.ErrorLoadingException
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.newSubtitleFile
@@ -17,7 +16,6 @@ import com.lagradost.cloudstream3.utils.schemaStripRegex
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeStreamLinkHandlerFactory
-import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.SubtitlesStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -62,8 +60,7 @@ open class YoutubeExtractor : ExtractorApi() {
         val bitrate: Int,
         val initRange: String?,
         val indexRange: String?,
-        val language: String,
-        val trackType: AudioTrackType?
+        val language: String
     )
 
     override suspend fun getUrl(
@@ -115,26 +112,10 @@ open class YoutubeExtractor : ExtractorApi() {
                         var rawLang = asr.audioTrackId ?: "Default"
                         if (rawLang.contains(".")) rawLang = rawLang.substringBefore(".") // يحول fr.3 إلى fr
 
-                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase(), asr.audioTrackType)
+                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase())
                     } catch (e: Exception) { null }
                 }.distinctBy { it.url }
-                    // v5: keep original + Arabic + English audio only; drop other dubbed tracks.
-                    // Metadata-grounded: NewPipe audioTrackType (ORIGINAL/DUBBED/DESCRIPTIVE/SECONDARY),
-                    // null when the video has no multi-audio metadata (single default track).
-                    .filter { info ->
-                        info.trackType == null || info.trackType == AudioTrackType.ORIGINAL ||
-                            info.language == "AR" || info.language == "EN"
-                    }
                 val audiosByLanguage = audioInfoList.groupBy { it.language }
-                // v5: expose audio in user-approved order — original track(s) first, then Arabic,
-                // then English. A language group counts as original when any of its streams is
-                // ORIGINAL or has no multi-audio metadata (single default track).
-                val originalLangs = audiosByLanguage.filterValues { streams ->
-                    streams.any { it.trackType == AudioTrackType.ORIGINAL || it.trackType == null }
-                }.keys
-                val orderedLangs = originalLangs.toList() +
-                    listOf("AR", "EN").filter { it !in originalLangs && it in audiosByLanguage.keys } +
-                    audiosByLanguage.keys.filter { it !in originalLangs && it != "AR" && it != "EN" }
                 try {
                     ytVideosSubtitles[videoId] = s.subtitlesDefault?.filterNotNull() ?: emptyList()
                 } catch (e: Exception) { }
@@ -142,35 +123,33 @@ open class YoutubeExtractor : ExtractorApi() {
 
                 for (video in videoOnlyList) {
                     if (audiosByLanguage.isNotEmpty()) {
-                        // v7 (user-approved 14430214): ONE DASH link per quality; the kept audio
-                        // tracks (original first, then ar, then en) ride inside the manifest and
-                        // are switched from the player's own audio-track menu. The source list
-                        // stays quality-only; the app appends the quality string itself.
-                        val selectedAudios = orderedLangs.mapNotNull { lang ->
-                            val audios = audiosByLanguage[lang] ?: return@mapNotNull null
-                            if (video.mimeType.contains("webm")) {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
+                        for ((lang, audios) in audiosByLanguage) {
+                            val bestAudioForLang = if (video.mimeType.contains("webm")) {
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
                             } else {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
                             }
-                        }
 
-                        if (selectedAudios.isNotEmpty()) {
-                            val dashXml = buildDashManifestXml(video, selectedAudios, durationSeconds)
-                            val localLink = registerManifestAndGetUrl(dashXml)
+                            if (bestAudioForLang != null) {
+                                val singleAudioList = listOf(bestAudioForLang)
+                                val dashXml = buildDashManifestXml(video, singleAudioList, durationSeconds)
+                                val localLink = registerManifestAndGetUrl(dashXml)
 
-                            if (localLink != null) {
-                                builtLinks.add(
-                                    newExtractorLink(
-                                        this.name,
-                                        "source",
-                                        localLink,
-                                        type = ExtractorLinkType.DASH
-                                    ) {
-                                        this.referer = mainUrl
-                                        this.quality = video.height
-                                    }
-                                )
+                                if (localLink != null) {
+                                    val finalName = "${video.label} ($lang) ${video.label}"
+
+                                    builtLinks.add(
+                                        newExtractorLink(
+                                            this.name,
+                                            finalName,
+                                            localLink,
+                                            type = ExtractorLinkType.DASH
+                                        ) {
+                                            this.referer = mainUrl
+                                            this.quality = video.height
+                                        }
+                                    )
+                                }
                             }
                         }
                     }
@@ -184,9 +163,9 @@ open class YoutubeExtractor : ExtractorApi() {
                         Triple(mUrl, label, height)
                     } catch (e: Exception) { null }
                 }
-                for ((mUrl, _, mHeight) in muxedList) {
+                for ((mUrl, mLabel, mHeight) in muxedList) {
                     builtLinks.add(
-                        newExtractorLink(this.name, "source (legacy)", mUrl, type = INFER_TYPE) {
+                        newExtractorLink(this.name, "$mLabel (Legacy)", mUrl, type = INFER_TYPE) {
                             this.referer = mainUrl
                             this.quality = mHeight
                         }
@@ -195,50 +174,18 @@ open class YoutubeExtractor : ExtractorApi() {
 
                 ytVideos[videoId] = builtLinks.toList()
 
-            } catch (e: Exception) {
-                logError(e)
-                // v4: surface a specific failure reason in the player instead of a silent "no links".
-                val msg = e.message ?: ""
-                val reason = when {
-                    e.javaClass.simpleName.contains("ReCaptcha", true) ||
-                        msg.contains("bot", true) || msg.contains("SIGN_IN", true) ||
-                        msg.contains("sign in", true) ->
-                        "YouTube blocked stream extraction (sign-in/bot check). Try a VPN or log in from the plugin settings."
-                    e.javaClass.simpleName.contains("ContentNotAvailable", true) ->
-                        "This video is unavailable (private, deleted, or region-locked)."
-                    else -> "Failed to extract video streams from YouTube."
-                }
-                throw ErrorLoadingException(reason)
-            }
+            } catch (e: Exception) { logError(e) }
         }
 
-        if (ytVideos[videoId].isNullOrEmpty()) {
-            throw ErrorLoadingException("No playable streams were returned by YouTube for this video.")
-        }
         ytVideos[videoId]?.forEach { callback(it) }
 
-        var arabicAutoAdded = false
-        ytVideosSubtitles[videoId]?.forEach { ss ->
+        ytVideosSubtitles[videoId]?.mapNotNull { ss ->
             try {
-                val lang = ss.locale?.language ?: return@forEach
-                val content = ss.content ?: ss.getUrl() ?: return@forEach
-                subtitleCallback(newSubtitleFile(lang, content))
-                // v7: when the WEB player-API captions path is bot-walled, this NewPipe path is
-                // the only subtitle source and previously offered NO Arabic option (user report
-                // 14432257). YouTube's own timedtext endpoint serves auto-translations via the
-                // tlang parameter on any caption track, so emit an Arabic variant per track.
-                // Guarded (release owner): only for a real URL track (not inline content), only once
-                // per video, never when an Arabic or already-translated track exists.
-                val trackUrl = if (ss.content == null) ss.getUrl() else null
-                val hasArabic = ytVideosSubtitles[videoId]?.any { it.locale?.language == "ar" } == true
-                if (lang != "ar" && !hasArabic && !arabicAutoAdded && trackUrl != null &&
-                    trackUrl.contains("timedtext") && !trackUrl.contains("tlang=")) {
-                    val autoUrl = if (trackUrl.contains("?")) "$trackUrl&tlang=ar" else "$trackUrl?tlang=ar"
-                    subtitleCallback(newSubtitleFile("Arabic عربي (auto-translated from $lang)", autoUrl))
-                    arabicAutoAdded = true
-                }
+                val lang = ss.locale?.language ?: return@mapNotNull null
+                val content = ss.content ?: ss.getUrl() ?: return@mapNotNull null
+                newSubtitleFile(lang, content)
             } catch (e: Exception) { null }
-        }
+        }?.forEach { subtitleCallback(it) }
     }
     @Synchronized
     private fun startServerIfNeeded() {
@@ -326,23 +273,12 @@ open class YoutubeExtractor : ExtractorApi() {
             val aMime = audio.mimeType
             val aCodecs = if (aMime.contains("webm")) "opus" else "mp4a.40.2"
 
-            // v7: real audio-track metadata so the player's audio menu can show and
-            // default correctly. lang only for real language codes; first track (the
-            // original) gets the main role, dubs get dub. Label matches the approved
-            // source / ar / en wording.
-            val aLang = audio.language.lowercase().takeIf { it.length == 2 }
-            val langAttr = if (aLang != null) " lang=\"$aLang\"" else ""
-            val role = if (index == 0) "main" else "dub"
-            val label = if (audio.trackType == AudioTrackType.ORIGINAL || audio.trackType == null) "source" else (aLang ?: "audio")
-
             val aSegmentBase = if (audio.initRange != null && audio.indexRange != null) {
                 """<SegmentBase indexRange="${audio.indexRange}"><Initialization range="${audio.initRange}" /></SegmentBase>"""
             } else ""
 
             sb.append("""
-                <AdaptationSet mimeType="$aMime"$langAttr subsegmentAlignment="true" subsegmentStartsWithSAP="1">
-                  <Role schemeIdUri="urn:mpeg:dash:role:2011" value="$role"/>
-                  <Label>$label</Label>
+                <AdaptationSet mimeType="$aMime" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
                   <Representation id="$audioId" bandwidth="${if(audio.bitrate>0) audio.bitrate else 128000}" codecs="$aCodecs">
                     <BaseURL>$cleanAudioUrl</BaseURL>
                     $aSegmentBase
