@@ -154,6 +154,15 @@ class ExampleProvider : MainAPI() {
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
+    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
+        loadLinksOwn(data, isCasting, sub, cb)
+    }
+
+    private suspend fun loadLinksOwn(
+        data: String,
+        isCasting: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ): Boolean {
         val baseUrl = data.trimEnd('/')
         val watchUrl = "$baseUrl/watch/"

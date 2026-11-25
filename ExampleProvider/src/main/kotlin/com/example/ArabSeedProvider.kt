@@ -311,6 +311,15 @@ class ArabSeedProvider : MainAPI() {
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
+    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
+        loadLinksOwn(data, isCasting, sub, cb)
+    }
+
+    private suspend fun loadLinksOwn(
+        data: String,
+        isCasting: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ): Boolean {
         val doc = safeGet(data)
         val watchUrl = doc.select(".watch__btn, a.watch__btn, a[href*='/watch']").attr("href")
@@ -353,16 +362,6 @@ class ArabSeedProvider : MainAPI() {
                 }
             } catch (e: Exception) {
                 // ignore download errors
-            }
-        }
-
-        // Same film from the other sites in this plugin (movies only, can be switched off in settings)
-        runCatching {
-            if (CrossServerSettings.isEnabled()) {
-                val movie = load(data) as? MovieLoadResponse
-                if (movie != null) {
-                    CrossServers.addSiblingServers(this, movie.name, movie.year, subtitleCallback, callback)
-                }
             }
         }
 
