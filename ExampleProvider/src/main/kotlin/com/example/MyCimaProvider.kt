@@ -11,77 +11,25 @@ class MyCimaProvider : MainAPI() {
     override var lang = "ar"
     override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries, TvType.Anime)
 
+    // Startup is only these rows: the home waits for every row, so each row adds fresh-open time.
+    // Every genre stays reachable by typing its exact name in search (see MyCimaGenres).
     override val mainPage = mainPageOf(
         "$mainUrl/movies/" to "أفلام",
-        "$mainUrl/tvshows/" to "مسلسلات",
-        "$mainUrl/genres/%d8%af%d8%b1%d8%a7%d9%85%d8%a7/" to "دراما",
-        "$mainUrl/genres/%d8%a5%d8%ab%d8%a7%d8%b1%d8%a9/" to "إثارة",
-        "$mainUrl/genres/%d9%83%d9%88%d9%85%d9%8a%d8%af%d9%8a%d8%a7/" to "كوميديا",
-        "$mainUrl/genres/%d8%ac%d8%b1%d9%8a%d9%85%d8%a9/" to "جريمة",
-        "$mainUrl/genres/%d8%ad%d8%b1%d9%83%d8%a9/" to "حركة",
-        "$mainUrl/genres/%d8%ba%d9%85%d9%88%d8%b6/" to "غموض",
-        "$mainUrl/genres/%d8%b1%d8%b3%d9%88%d9%85-%d9%85%d8%aa%d8%ad%d8%b1%d9%83%d8%a9/" to "رسوم متحركة",
-        "$mainUrl/genres/%d8%b1%d9%88%d9%85%d9%86%d8%b3%d9%8a%d8%a9/" to "رومنسية",
-        "$mainUrl/genres/%d8%b1%d8%b9%d8%a8/" to "رعب",
-        "$mainUrl/genres/%d8%ae%d9%8a%d8%a7%d9%84-%d8%b9%d9%84%d9%85%d9%8a-%d9%88%d9%81%d8%a7%d9%86%d8%aa%d8%a7%d8%b2%d9%8a%d8%a7/" to "خيال علمي وفانتازيا",
-        "$mainUrl/genres/%d8%b9%d8%a7%d8%a6%d9%84%d9%8a/" to "عائلي",
-        "$mainUrl/genres/%d9%85%d8%ba%d8%a7%d9%85%d8%b1%d8%a9/" to "مغامرة",
-        "$mainUrl/genres/%d9%81%d8%a7%d9%86%d8%aa%d8%a7%d8%b2%d9%8a%d8%a7/" to "فانتازيا",
-        "$mainUrl/genres/%d8%ae%d9%8a%d8%a7%d9%84-%d8%b9%d9%84%d9%85%d9%8a/" to "خيال علمي",
-        "$mainUrl/genres/%d9%88%d8%ab%d8%a7%d8%a6%d9%82%d9%8a/" to "وثائقي",
-        "$mainUrl/genres/%d8%ad%d8%b1%d9%83%d8%a9-%d9%88%d9%85%d8%ba%d8%a7%d9%85%d8%b1%d8%a9/" to "حركة ومغامرة",
-        "$mainUrl/genres/%d8%aa%d8%a7%d8%b1%d9%8a%d8%ae/" to "تاريخ",
-        "$mainUrl/genres/%d8%ad%d8%b1%d8%a8/" to "حرب",
-        "$mainUrl/genres/%d9%85%d9%88%d8%b3%d9%8a%d9%82%d9%89/" to "موسيقى",
-        "$mainUrl/genres/%d8%ba%d8%b1%d8%a8%d9%8a/" to "غربي",
-        "$mainUrl/genres/%d9%81%d9%8a%d9%84%d9%85-%d8%aa%d9%84%d9%81%d8%a7%d8%b2%d9%8a/" to "فيلم تلفازي",
-        "$mainUrl/genres/%d9%88%d8%a7%d9%82%d8%b9/" to "واقع",
-        "$mainUrl/genres/%d8%a3%d9%88%d8%a8%d8%b1%d8%a7-%d8%b5%d8%a7%d8%a8%d9%88%d9%86%d9%8a%d8%a9/" to "أوبرا صابونية"
+        "$mainUrl/tvshows/" to "مسلسلات"
     )
 
-    private fun String.getImageURL(): String? {
-        return this.replace("--im(age|g):url\\(|\\);".toRegex(), "")
-            .replace("background-image:url\\('|'\\);".toRegex(), "")
-            .ifBlank { null }
-    }
-
-    private fun String.getIntFromText(): Int? {
-        return Regex("""\d+""").find(this)?.groupValues?.firstOrNull()?.toIntOrNull()
-    }
-
     private fun Element.toSearchResult(): SearchResponse? {
-        val aTag = selectFirst("div.Thumb--GridItem a") ?: return null
-        val href = aTag.attr("href")
-        if (href.isBlank()) return null
-        val fullTitle = aTag.attr("title").ifBlank { aTag.selectFirst("strong")?.text() ?: return null }
-        val year = fullTitle.getIntFromText()
-        val title = fullTitle
-            .replace("($year)", "")
-            .replace(Regex("مشاهدة|مترجمة|مترجم|اون لاين"), "")
-            .trim()
-
-        val posterUrl = selectFirst("span.BG--GridItem")?.attr("data-src")?.ifBlank { null }
-            ?: selectFirst("meta[itemprop=thumbnailUrl]")?.attr("content")
-
-        val kind = selectFirst("strong small")?.text().orEmpty()
-        val tvType = when {
-            kind.contains("مسلسل") -> TvType.TvSeries
-            kind.contains("فيلم") -> TvType.Movie
-            fullTitle.contains("انمي") || fullTitle.contains("أنمي") -> TvType.Anime
-            fullTitle.contains("فيلم") -> TvType.Movie
-            else -> TvType.TvSeries
-        }
-
-        return when (tvType) {
-            TvType.Movie -> newMovieSearchResponse(title, href, TvType.Movie) {
-                this.posterUrl = posterUrl
-                this.year = year
+        val c = MyCimaParser.card(this) ?: return null
+        return when (c.type) {
+            MyCimaParser.Kind.MOVIE -> newMovieSearchResponse(c.title, c.url, TvType.Movie) {
+                this.posterUrl = c.poster
+                this.year = c.year
             }
-            TvType.Anime -> newAnimeSearchResponse(title, href, TvType.Anime) {
-                this.posterUrl = posterUrl
+            MyCimaParser.Kind.ANIME -> newAnimeSearchResponse(c.title, c.url, TvType.Anime) {
+                this.posterUrl = c.poster
             }
-            else -> newTvSeriesSearchResponse(title, href, TvType.TvSeries) {
-                this.posterUrl = posterUrl
+            else -> newTvSeriesSearchResponse(c.title, c.url, TvType.TvSeries) {
+                this.posterUrl = c.poster
             }
         }
     }
@@ -97,128 +45,70 @@ class MyCimaProvider : MainAPI() {
         val pageUrl = if (page > 1) "${request.data.trimEnd('/')}/page/$page/" else request.data
         val home = listings.load(pageUrl) {
             app.get(pageUrl, timeout = 20L).document
-                .select("div.Grid--WecimaPosts div.GridItem")
+                .select(MyCimaParser.CARD)
                 .mapNotNull { it.toSearchResult() }
                 .distinctBy { it.url }
         }
         return newHomePageResponse(request.name, home, home.isNotEmpty())
     }
 
-    override suspend fun search(query: String): List<SearchResponse> {
-        val q = query.trim().replace(" ", "%20")
-        val document = app.get("$mainUrl/search/$q").document
-        return document.select("div.GridItem")
-            .filterNot { it.text().contains("اعلان") }
-            .mapNotNull { it.toSearchResult() }
-            .distinctBy { it.url }
+    private suspend fun fetchCards(url: String): Pair<List<SearchResponse>, Boolean> {
+        val doc = app.get(url, timeout = 20L).document
+        val items = doc.select(MyCimaParser.CARD).mapNotNull { it.toSearchResult() }.distinctBy { it.url }
+        return items to MyCimaParser.hasNext(doc)
     }
 
+    // Exact genre name (or "تصنيف <name>") lists that genre page by page; anything else is normal site search.
+    override suspend fun search(query: String, page: Int): SearchResponseList? {
+        val genre = MyCimaGenres.match(query)
+        val url = if (genre != null) {
+            if (page > 1) "$mainUrl/genres/${genre.slug}/page/$page/" else "$mainUrl/genres/${genre.slug}/"
+        } else {
+            val q = query.trim().replace(" ", "%20")
+            if (page > 1) "$mainUrl/search/$q/page/$page/" else "$mainUrl/search/$q"
+        }
+        val (items, hasNext) = fetchCards(url)
+        return newSearchResponseList(items, hasNext)
+    }
+
+    override suspend fun search(query: String): List<SearchResponse> =
+        search(query, 1)?.items.orEmpty()
+
     override suspend fun load(url: String): LoadResponse {
-        val document = app.get(url).document
-
-        val rawTitle = document.selectFirst("div.Title--Content--Single-begin h1")?.text()
-            ?: document.selectFirst("meta[property=og:title]")?.attr("content")
-            ?: "بدون عنوان"
-        val year = rawTitle.getIntFromText()
-        val title = rawTitle
-            .replace("($year)", "")
-            .replace(Regex("مشاهدة|مترجمة|مترجم|اون لاين"), "")
-            .trim()
-
-        val poster = document.selectFirst("mycima.separated--top")?.attr("style")?.getImageURL()
-            ?: document.selectFirst("meta[property=og:image]")?.attr("content")
-            ?: document.selectFirst("meta[itemprop=thumbnailUrl]")?.attr("content")
-
-        val plot = document.selectFirst("div.StoryMovieContent")?.text()
-            ?: document.selectFirst("div.PostItemContent")?.text()
-            ?: document.selectFirst("meta[property=og:description]")?.attr("content")
-
-        val recommendations = document.select("div.Grid--WecimaPosts div.GridItem")
-            .mapNotNull { it.toSearchResult() }
-
-        val episodeLinks = document.select("div.Seasons--Episodes div.EpisodesList a")
-            .distinctBy { it.attr("href") }
-
-        val isAnime = rawTitle.contains("انمي") || rawTitle.contains("أنمي")
-
-        return if (episodeLinks.isNotEmpty()) {
-            // صفحة مسلسل: نجمع الحلقات من قائمة الحلقات (والموسم لو موجود)
-            val episodes = episodeLinks.mapIndexed { index, el ->
-                val epTitle = el.selectFirst("episodetitle")?.text()?.trim()
-                    ?.ifBlank { null }
-                    ?: el.attr("title").trim()
-                newEpisode(el.attr("href")) {
-                    this.name = epTitle
-                    this.episode = epTitle.getIntFromText() ?: (index + 1)
+        val d = MyCimaParser.detail(app.get(url).document)
+        return if (d.episodes.isNotEmpty()) {
+            val episodes = d.episodes.map { e ->
+                newEpisode(e.url) {
+                    this.name = e.name
+                    this.episode = e.number
                 }
-            }.sortedBy { it.episode }
-
-            newTvSeriesLoadResponse(title, url, if (isAnime) TvType.Anime else TvType.TvSeries, episodes) {
-                this.posterUrl = poster
-                this.plot = plot
-                this.year = year
-                this.recommendations = recommendations
+            }
+            newTvSeriesLoadResponse(d.title, url, if (d.isAnime) TvType.Anime else TvType.TvSeries, episodes) {
+                this.posterUrl = d.poster
+                this.plot = d.plot
+                this.year = d.year
             }
         } else {
-            newMovieLoadResponse(title, url, TvType.Movie, url) {
-                this.posterUrl = poster
-                this.plot = plot
-                this.year = year
-                this.recommendations = recommendations
+            newMovieLoadResponse(d.title, url, TvType.Movie, url) {
+                this.posterUrl = d.poster
+                this.plot = d.plot
+                this.year = d.year
             }
         }
     }
 
+    // Independent stage: only this site's own servers (button.mc-server-btn). No cross-site siblings.
     override suspend fun loadLinks(
         data: String,
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
-    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
-        loadLinksOwn(data, isCasting, sub, cb)
-    }
-
-    private suspend fun loadLinksOwn(
-        data: String,
-        isCasting: Boolean,
-        subtitleCallback: (SubtitleFile) -> Unit,
-        callback: (ExtractorLink) -> Unit
     ): Boolean {
-        val document = app.get(data).document
-        val embedUrls = mutableListOf<String>()
-
-        // التصميم الجديد: أزرار السيرفرات button.mc-server-btn فيها data-url مباشر
-        document.select("button.mc-server-btn[data-url]").forEach { b ->
-            val u = b.attr("data-url")
-            if (u.startsWith("http")) embedUrls.add(u)
-        }
-
-        // التصميم القديم: روابط مشفرة Base64 داخل ul#watch
-        document.select("ul#watch li[data-encoded]").forEach { li ->
-            val decoded = try {
-                base64Decode(li.attr("data-encoded"))
-            } catch (_: Exception) {
-                ""
-            }
-            if (decoded.startsWith("http")) {
-                embedUrls.add(decoded)
-            }
-        }
-
-        // سيرفرات التحميل: نفس الروابط بصيغة /d/ نحولها لصيغة المشاهدة /e/
-        document.select("ul.List--Download--Wecima--Single li a[href]").forEach { a ->
-            val href = a.attr("href")
-            if (href.startsWith("http")) {
-                embedUrls.add(href.replace("/d/", "/e/"))
-            }
-        }
-
+        val servers = MyCimaParser.servers(app.get(data).document)
         var found = false
-        embedUrls.distinct().amap { embedUrl ->
+        servers.amap { embedUrl ->
             try {
-                if (loadExtractor(embedUrl, data, subtitleCallback, callback)) {
-                    found = true
-                }
+                if (loadExtractor(embedUrl, data, subtitleCallback, callback)) found = true
             } catch (_: Exception) {
             }
         }
