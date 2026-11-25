@@ -41,7 +41,7 @@ object CrossServers {
     private const val SEARCH_CANDIDATES = 5
 
     /** Providers that stay independent: they neither search other sites nor appear as a sibling. */
-    private val isolated = setOf("MyCima Kemo", "CimaTime Kemo")
+    private val isolated = setOf("MyCima Kemo")
 
     fun isIsolated(name: String) = name in isolated
 

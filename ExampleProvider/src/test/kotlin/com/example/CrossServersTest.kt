@@ -30,21 +30,21 @@ class CrossServersTest {
     @Test fun isolatedSiteIsNeverASibling() {
         val r = pick("ArabSeed Kemo")
         assertFalse(r.contains("MyCima Kemo"))
-        assertEquals(listOf("Akwam Kemo", "Aflaam Kemo"), r)
+        assertEquals(listOf("Akwam Kemo", "Aflaam Kemo", "CimaTime Kemo"), r)
     }
     @Test fun isolatedSiteSearchesNoSiblings() {
         assertTrue(CrossServers.isIsolated("MyCima Kemo"))
         assertEquals(emptyList<String>(), pick("MyCima Kemo"))
     }
-    @Test fun cimaTimeIsIsolatedBothWays() {
-        assertTrue(CrossServers.isIsolated("CimaTime Kemo"))
-        assertEquals(emptyList<String>(), pick("CimaTime Kemo"))
-        assertFalse(pick("Akwam Kemo").contains("CimaTime Kemo"))
-        assertFalse(pick("Aflaam Kemo").contains("CimaTime Kemo"))
+    @Test fun cimaTimeIsConnectedBothWays() {
+        assertFalse(CrossServers.isIsolated("CimaTime Kemo"))
+        assertTrue(pick("CimaTime Kemo").containsAll(listOf("ArabSeed Kemo", "Akwam Kemo", "Aflaam Kemo")))
+        assertFalse(pick("CimaTime Kemo").contains("MyCima Kemo"))
+        assertTrue(pick("Akwam Kemo").contains("CimaTime Kemo"))
     }
     @Test fun otherSitesUnaffectedAndPluginScopeKept() {
         assertFalse(CrossServers.isIsolated("Akwam Kemo"))
-        assertEquals(listOf("ArabSeed Kemo", "Aflaam Kemo"), pick("Akwam Kemo"))
+        assertEquals(listOf("ArabSeed Kemo", "Aflaam Kemo", "CimaTime Kemo"), pick("Akwam Kemo"))
         assertFalse(pick("Akwam Kemo").contains("StreamPlay"))
     }
     @Test fun cimaTimeTitlesMatchOnlyTheSameFilm() {
