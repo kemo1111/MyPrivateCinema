@@ -541,6 +541,12 @@ class YoutubeProvider(
                 list.add(MainPageData(if (isEn) "Trending" else "الرئيسية (Trending)", "Home"))
             }
 
+            // v10: watch-history feed row, only when the optional cookie login exists.
+            val hasLoginCookies = !sharedPref?.getString("SID", null).isNullOrBlank()
+            if (hasLoginCookies && sharedPref?.getBoolean("show_history_home", true) != false) {
+                list.add(MainPageData(if (isEn) "Watch History" else "سجل المشاهدة (History)", "$mainUrl/feed/history"))
+            }
+
             val customSections = getCustomHomepages()
 
             customSections.filter { it.isEnabled }.forEach { section ->
@@ -644,7 +650,7 @@ class YoutubeProvider(
                 if (cleanUrl.contains("?") && !isPlaylist) cleanUrl = cleanUrl.substringBefore("?")
 
                 val targetUrl = when {
-                    requestData.startsWith("http") && !isPlaylist && !cleanUrl.endsWith("/videos") -> "$cleanUrl/videos"
+                    requestData.startsWith("http") && !isPlaylist && !cleanUrl.endsWith("/videos") && !cleanUrl.contains("/feed/") -> "$cleanUrl/videos"
                     requestData.startsWith("http") -> requestData
                     else -> mainUrl
                 }
