@@ -19,4 +19,26 @@ class CrossServersTest {
     @Test fun normalizeStripsNoise() {
         assertEquals("inception", CrossServers.normalize("فيلم Inception (2010) مترجم HD"))
     }
+    private data class Site(val name: String, val plugin: String?)
+    private val sites = listOf(
+        Site("ArabSeed Kemo", "p"), Site("MyCima Kemo", "p"), Site("Akwam Kemo", "p"),
+        Site("Aflaam Kemo", "p"), Site("StreamPlay", "other")
+    )
+    private fun pick(self: String) =
+        CrossServers.pickSiblings(self, "p", sites, { it.name }, { it.plugin }).map { it.name }
+
+    @Test fun isolatedSiteIsNeverASibling() {
+        val r = pick("ArabSeed Kemo")
+        assertFalse(r.contains("MyCima Kemo"))
+        assertEquals(listOf("Akwam Kemo", "Aflaam Kemo"), r)
+    }
+    @Test fun isolatedSiteSearchesNoSiblings() {
+        assertTrue(CrossServers.isIsolated("MyCima Kemo"))
+        assertEquals(emptyList<String>(), pick("MyCima Kemo"))
+    }
+    @Test fun otherSitesUnaffectedAndPluginScopeKept() {
+        assertFalse(CrossServers.isIsolated("Akwam Kemo"))
+        assertEquals(listOf("ArabSeed Kemo", "Aflaam Kemo"), pick("Akwam Kemo"))
+        assertFalse(pick("Akwam Kemo").contains("StreamPlay"))
+    }
 }

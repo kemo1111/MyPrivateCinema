@@ -40,6 +40,19 @@ object CrossServers {
     private const val PER_SITE_TIMEOUT_MS = 25_000L
     private const val SEARCH_CANDIDATES = 5
 
+    /** Providers that stay independent: they neither search other sites nor appear as a sibling. */
+    private val isolated = setOf("MyCima Kemo")
+
+    fun isIsolated(name: String) = name in isolated
+
+    /** Sites that may serve as siblings for [selfName]: same plugin, not itself, not isolated. */
+    fun <T> pickSiblings(selfName: String, selfPlugin: Any?, all: List<T>, nameOf: (T) -> String, pluginOf: (T) -> Any?): List<T> {
+        if (isIsolated(selfName)) return emptyList()
+        return all.filter {
+            nameOf(it) != selfName && !isIsolated(nameOf(it)) && pluginOf(it) != null && pluginOf(it) == selfPlugin
+        }
+    }
+
     private val noise = listOf(
         "فيلم", "مترجم", "مترجمة", "اون لاين", "أون لاين", "مشاهدة", "تحميل", "كامل", "مدبلج", "بجودة", "جودة",
         "hd", "web-dl", "webdl", "bluray", "720p", "1080p", "4k"
@@ -107,6 +120,7 @@ object CrossServers {
         callback: (ExtractorLink) -> Unit,
         own: suspend ((SubtitleFile) -> Unit, (ExtractorLink) -> Unit) -> Boolean
     ): Boolean {
+        if (isIsolated(self.name)) return own(subtitleCallback, callback)
         val ok = own(subtitleCallback, callback)
         runCatching {
             if (CrossServerSettings.isEnabled() && coroutineContext[InsideCrossSearch.Key] == null) {
@@ -126,9 +140,7 @@ object CrossServers {
     ) {
         if (!CrossServerSettings.isEnabled()) return
         if (normalize(title).isEmpty()) return
-        val siblings = APIHolder.allProviders.toList().filter {
-            it !== self && it.name != self.name && it.sourcePlugin != null && it.sourcePlugin == self.sourcePlugin
-        }
+        val siblings = pickSiblings(self.name, self.sourcePlugin, APIHolder.allProviders.toList(), { it.name }, { it.sourcePlugin }).filter { it !== self }
         if (siblings.isEmpty()) return
         val seen = HashSet<String>()
         coroutineScope {
