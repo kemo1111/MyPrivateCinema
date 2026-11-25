@@ -1,11 +1,11 @@
 // Vendored from 3rabi / re-3arabi (Arabic CloudStream extensions): https://github.com/Abodabodd/re-3arabi
 // Module: Youtube (published plugin version 3). Upstream author: Abodabodd. Retrieved 2026-11-25.
 // Use and modification are granted by the upstream README (section "الحقوق") with mention of the original repository.
-version = 7
+version = 8
 
 cloudstream {
     // Vendored: attribution required by the 3rabi README grant ("with mention of the original repository").
-    description = "By Abodabodd - source: github.com/Abodabodd/re-3arabi - enhanced (home rows, filters, subs order, channel pages, history/subs rows, diagnostics)"
+    description = "By Abodabodd - source: github.com/Abodabodd/re-3arabi"
     authors = listOf("Abodabodd")
     language = "ar"
 
