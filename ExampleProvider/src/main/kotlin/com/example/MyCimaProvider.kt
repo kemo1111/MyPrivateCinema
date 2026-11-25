@@ -86,12 +86,21 @@ class MyCimaProvider : MainAPI() {
         }
     }
 
+    // wecimas.live builds each listing page in 1.5-3s and gets much slower when many are requested
+    // at once, while the home screen asks for every row together. ListingLoader limits that to 3 at a
+    // time, retries once, never throws, bounds the whole call and caches only larger good pages.
+    private companion object {
+        val listings = ListingLoader<SearchResponse>()
+    }
+
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val pageUrl = if (page > 1) "${request.data.trimEnd('/')}/page/$page/" else request.data
-        val document = app.get(pageUrl).document
-        val home = document.select("div.Grid--WecimaPosts div.GridItem")
-            .mapNotNull { it.toSearchResult() }
-            .distinctBy { it.url }
+        val home = listings.load(pageUrl) {
+            app.get(pageUrl, timeout = 20L).document
+                .select("div.Grid--WecimaPosts div.GridItem")
+                .mapNotNull { it.toSearchResult() }
+                .distinctBy { it.url }
+        }
         return newHomePageResponse(request.name, home, home.isNotEmpty())
     }
 
