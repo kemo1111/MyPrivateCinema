@@ -684,6 +684,50 @@ class YoutubeProvider(
                     } else {
                         processRecursive(initialData, results, seenIds, playlistMode = false)
                         nextContinuation = findTokenRecursive(initialData)
+
+                        // v10 (user 14500376): the home feed mixes Shorts shelves into ordinary
+                        // items; the v9 filter drops them, so one fetched page can yield only a
+                        // handful of videos. Refill from continuations, bounded. Same WEB browse call the
+                        // page>=2 path already uses.
+                        var refills = 0
+                        val seenTokens = mutableSetOf<String>()
+                        // Release-owner bounds: real Home feed only (not history/channels/topic rows), small
+                        // target, at most 2 extra sequential requests, stop on a repeated token or any error.
+                        while (requestData == "Home" && results.size < 12 && !nextContinuation.isNullOrBlank() && refills < 2 && !savedApiKey.isNullOrBlank() && seenTokens.add(nextContinuation!!)) {
+                            refills++
+                            try {
+                            val tokenToUse = java.net.URLDecoder.decode(nextContinuation, "UTF-8")
+                            nextContinuation = null
+                            val refillResponse = app.post(
+                                "$mainUrl/youtubei/v1/browse?key=$savedApiKey",
+                                json = mapOf(
+                                    "context" to mapOf(
+                                        "client" to mapOf(
+                                            "visitorData" to (savedVisitorData ?: ""),
+                                            "clientName" to "WEB",
+                                            "clientVersion" to (savedClientVersion ?: "2.20240725.01.00"),
+                                            "platform" to "DESKTOP"
+                                        )
+                                    ),
+                                    "continuation" to tokenToUse
+                                ),
+                                headers = mapOf(
+                                    "X-Youtube-Client-Name" to "WEB",
+                                    "X-Youtube-Client-Version" to (savedClientVersion ?: ""),
+                                    "Origin" to mainUrl,
+                                    "Referer" to mainUrl
+                                ),
+                                interceptor = ytInterceptor
+                            ).parsedSafe<Map<String, Any>>()
+                            if (refillResponse == null) break
+                            val refillActions = refillResponse["onResponseReceivedActions"]
+                                ?: refillResponse["onResponseReceivedCommands"]
+                                ?: refillResponse["continuationContents"]
+                                ?: refillResponse
+                            processRecursive(refillActions, results, seenIds, playlistMode = false)
+                            nextContinuation = findTokenRecursive(refillResponse)
+                            } catch (e: Exception) { break }
+                        }
                     }
                 }
             } else {
