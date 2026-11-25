@@ -17,6 +17,7 @@ import com.lagradost.cloudstream3.utils.schemaStripRegex
 import org.schabi.newpipe.extractor.ServiceList
 import org.schabi.newpipe.extractor.services.youtube.extractors.YoutubeStreamExtractor
 import org.schabi.newpipe.extractor.services.youtube.linkHandler.YoutubeStreamLinkHandlerFactory
+import org.schabi.newpipe.extractor.stream.AudioTrackType
 import org.schabi.newpipe.extractor.stream.SubtitlesStream
 import java.io.BufferedReader
 import java.io.InputStreamReader
@@ -61,7 +62,8 @@ open class YoutubeExtractor : ExtractorApi() {
         val bitrate: Int,
         val initRange: String?,
         val indexRange: String?,
-        val language: String
+        val language: String,
+        val trackType: AudioTrackType?
     )
 
     override suspend fun getUrl(
@@ -113,10 +115,26 @@ open class YoutubeExtractor : ExtractorApi() {
                         var rawLang = asr.audioTrackId ?: "Default"
                         if (rawLang.contains(".")) rawLang = rawLang.substringBefore(".") // يحول fr.3 إلى fr
 
-                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase())
+                        AudioInfo(aUrl, mime, bitrate, initR, indexR, rawLang.uppercase(), asr.audioTrackType)
                     } catch (e: Exception) { null }
                 }.distinctBy { it.url }
+                    // v5: keep original + Arabic + English audio only; drop other dubbed tracks.
+                    // Metadata-grounded: NewPipe audioTrackType (ORIGINAL/DUBBED/DESCRIPTIVE/SECONDARY),
+                    // null when the video has no multi-audio metadata (single default track).
+                    .filter { info ->
+                        info.trackType == null || info.trackType == AudioTrackType.ORIGINAL ||
+                            info.language == "AR" || info.language == "EN"
+                    }
                 val audiosByLanguage = audioInfoList.groupBy { it.language }
+                // v5: expose audio in user-approved order — original track(s) first, then Arabic,
+                // then English. A language group counts as original when any of its streams is
+                // ORIGINAL or has no multi-audio metadata (single default track).
+                val originalLangs = audiosByLanguage.filterValues { streams ->
+                    streams.any { it.trackType == AudioTrackType.ORIGINAL || it.trackType == null }
+                }.keys
+                val orderedLangs = originalLangs.toList() +
+                    listOf("AR", "EN").filter { it !in originalLangs && it in audiosByLanguage.keys } +
+                    audiosByLanguage.keys.filter { it !in originalLangs && it != "AR" && it != "EN" }
                 try {
                     ytVideosSubtitles[videoId] = s.subtitlesDefault?.filterNotNull() ?: emptyList()
                 } catch (e: Exception) { }
@@ -124,11 +142,12 @@ open class YoutubeExtractor : ExtractorApi() {
 
                 for (video in videoOnlyList) {
                     if (audiosByLanguage.isNotEmpty()) {
-                        for ((lang, audios) in audiosByLanguage) {
+                        for (lang in orderedLangs) {
+                            val audios = audiosByLanguage[lang] ?: continue
                             val bestAudioForLang = if (video.mimeType.contains("webm")) {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
                             } else {
-                                audios.sortedWith(compareByDescending<AudioInfo> { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
+                                audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
                             }
 
                             if (bestAudioForLang != null) {

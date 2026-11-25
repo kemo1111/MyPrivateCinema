@@ -42,20 +42,14 @@ class YoutubeProvider(
     override val supportedTypes = setOf(TvType.Movie, TvType.Live)
 
     companion object {
-
-        private val homeShorts = mutableListOf<Episode>()
-        private val searchShorts = mutableListOf<Episode>()
     }
 
-    private var isSearchContext = false
 
     // v4 helpers: shorts visibility, upcoming premieres filter, duration parsing.
     private fun isShortsEnabled(): Boolean = sharedPref?.getBoolean("show_shorts", true) != false
 
     // v4: category-row fallback queries, used when a topic channel page serves no videos.
     private val categorySearchFallback = mapOf(
-        "UCOpNcN46UbXVtpKMrmU4Abg" to "ألعاب",
-        "UC-9-kyTW8ZkZNDHQJ6FgpwQ" to "موسيقى",
         "UC4R8DWoMoI7CAwX8_LjQHig" to "بث مباشر",
         "UCYfdidRxbB8Qhf0Nx7ioOYw" to "أخبار"
     )
@@ -346,22 +340,10 @@ class YoutubeProvider(
                         ?.getMapKey("image")?.getListKey("sources")?.lastOrNull()?.getString("url")
                 if (poster.isNullOrBlank()) poster = "https://i.ytimg.com/vi/$videoId/oar2.jpg"
 
-                val currentList = if (isSearchContext) searchShorts else homeShorts
-                val episodeNum = currentList.size + 1
-                val contextTag = if (isSearchContext) "&ctx=search" else "&ctx=home"
-                val finalUrl = "$mainUrl/shorts/$videoId$contextTag"
+                // v4.1: a short opens as a single video, not an auto-assembled feed.
+                val finalTitle = "[Shorts] {$views} $title"
 
-                if (currentList.none { it.data == finalUrl }) {
-                    currentList.add(newEpisode(finalUrl) {
-                        this.name = title
-                        this.posterUrl = poster
-                        this.episode = episodeNum
-                    })
-                }
-
-                val finalTitle = "#$episodeNum {$views} $title"
-
-                return newMovieSearchResponse(finalTitle, finalUrl, TvType.Movie) {
+                return newMovieSearchResponse(finalTitle, "$mainUrl/watch?v=$videoId", TvType.Movie) {
                     this.posterUrl = poster
                 }
             }
@@ -425,22 +407,12 @@ class YoutubeProvider(
                     return null
                 }
                 if (isShorts) {
-                    val currentList = if (isSearchContext) searchShorts else homeShorts
-                    val episodeNum = currentList.size + 1
-                    val contextTag = if (isSearchContext) "&ctx=search" else "&ctx=home"
-                    val finalUrl = "$mainUrl/shorts/$videoId$contextTag"
+                    // v4.1: a short opens as a single video, not an auto-assembled feed.
                     poster = "https://i.ytimg.com/vi/$videoId/oar2.jpg"
-                    if (currentList.none { it.data == finalUrl }) {
-                        currentList.add(newEpisode(finalUrl) {
-                            this.name = title
-                            this.posterUrl = poster
-                            this.episode = episodeNum
-                        })
-                    }
-                    finalTitle = "#$episodeNum [Shorts] {$views} $title"
+                    finalTitle = "[Shorts] {$views} $title"
                     return newMovieSearchResponse(
                         finalTitle,
-                        finalUrl,
+                        "$mainUrl/watch?v=$videoId",
                         TvType.Movie
                     ) { this.posterUrl = poster }
                 } else {
@@ -587,8 +559,6 @@ class YoutubeProvider(
 
             // v4: built-in YouTube category rows (topic channels, scraped like custom channel sections).
             if (sharedPref?.getBoolean("show_categories_home", true) != false) {
-                list.add(MainPageData(if (isEn) "Gaming" else "ألعاب (Gaming)", "$mainUrl/channel/UCOpNcN46UbXVtpKMrmU4Abg"))
-                list.add(MainPageData(if (isEn) "Music" else "موسيقى (Music)", "$mainUrl/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ"))
                 list.add(MainPageData(if (isEn) "Live now" else "بث مباشر (Live)", "$mainUrl/channel/UC4R8DWoMoI7CAwX8_LjQHig"))
                 list.add(MainPageData(if (isEn) "News" else "أخبار (News)", "$mainUrl/channel/UCYfdidRxbB8Qhf0Nx7ioOYw"))
             }
@@ -698,7 +668,6 @@ class YoutubeProvider(
         try {
             if (page == 1) {
                 continuationTokens.remove(requestData)
-                if (requestData == "Home") homeShorts.clear()
 
                 var cleanUrl = requestData
                 if (cleanUrl.contains("?") && !isPlaylist) cleanUrl = cleanUrl.substringBefore("?")
@@ -904,9 +873,7 @@ class YoutubeProvider(
     override suspend fun search(query: String, page: Int): SearchResponseList? {
         val results = mutableListOf<SearchResponse>()
 
-        isSearchContext = true
         if (page == 1) {
-            searchShorts.clear()
             // v4: pasting a YouTube video/channel/playlist URL into search opens it directly.
             resolveDirectUrl(query.trim())?.let { return newSearchResponseList(listOf(it), false) }
         }
@@ -1028,30 +995,9 @@ class YoutubeProvider(
 
 override suspend fun load(url: String): LoadResponse {
         Log.d(name, "load called for url=$url")
+        // v4.1: a pasted /shorts/ URL opens as a single video like any watch link.
         if (url.contains("/shorts/")) {
-            val videoId = url.extractYoutubeId() ?: "video"
-            val useSearchList = url.contains("&ctx=search")
-            val sourceList = if (useSearchList) searchShorts else homeShorts
-            val targetEpisodes = sourceList.toMutableList()
-            var currentEp = targetEpisodes.find { it.data.extractYoutubeId() == videoId }
-
-            if (currentEp == null) {
-                val fallbackEp = newEpisode(url) {
-                    this.name = "Shorts Video"
-                    this.posterUrl = buildThumbnailFromId(videoId)
-                    this.episode = targetEpisodes.size + 1
-                }
-                targetEpisodes.add(0, fallbackEp)
-                currentEp = fallbackEp
-            }
-
-            val poster = currentEp?.posterUrl ?: buildThumbnailFromId(videoId)
-
-            return newTvSeriesLoadResponse("Shorts Feed", url, TvType.TvSeries, targetEpisodes) {
-                this.posterUrl = poster
-                this.plot = "قائمة تشغيل تلقائية من الشورتس (${targetEpisodes.size} فيديو)"
-                this.tags = listOf("Shorts", "Feed")
-            }
+            url.extractYoutubeId()?.let { return load("$mainUrl/watch?v=$it") }
         }
         if (url.contains("/@") || url.contains("/channel/") || url.contains("/c/") || url.contains("/user/")) {
             try {
@@ -1258,7 +1204,7 @@ override suspend fun load(url: String): LoadResponse {
                             }
                             if (popularEpisodes.isNotEmpty()) {
                                 val popularUrls = popularEpisodes.map { it.data }.toSet()
-                                finalEpisodes = (popularEpisodes + (allEpisodes.filter { it.data !in popularUrls })).toMutableList()
+                                finalEpisodes = (popularEpisodes + allEpisodes.filter { it.data !in popularUrls }).toMutableList()
                                 merged = true
                             }
                         }
@@ -1556,7 +1502,7 @@ override suspend fun load(url: String): LoadResponse {
                     // v4: subtitles collected, labeled (CC human / ASR auto / Auto translated),
                     // then emitted Arabic + English first.
                     val explicitSubs = mutableListOf<Triple<String, String, String>>()
-                    val autoSubs = mutableListOf<Pair<String, String>>()
+                    val autoSubs = mutableListOf<Triple<String, String, String>>()
 
                     var baseTrack = captionTracks.optJSONObject(0)
                     var baseLangCode = ""
@@ -1572,6 +1518,8 @@ override suspend fun load(url: String): LoadResponse {
 
                     val baseUrl = baseTrack.optString("baseUrl", "")
                     baseLangCode = baseTrack.optString("languageCode", "original").lowercase()
+                    val baseKind = baseTrack.optString("kind", "")
+                    val srcLabel = if (baseKind == "asr") "$baseLangCode(ASR)" else baseLangCode
                     for (i in 0 until captionTracks.length()) {
                         val track = captionTracks.optJSONObject(i)
                         val name = track.optJSONObject("name")?.optString("simpleText") ?: ""
@@ -1604,7 +1552,13 @@ override suspend fun load(url: String): LoadResponse {
 
                             if (!seenSubs.contains(autoUrl)) {
                                 seenSubs.add(autoUrl)
-                                autoSubs.add("Auto: $baseLangCode → $targetLang" to autoUrl)
+                                // v5: the Arabic option must read as machine-translated, with source marked.
+                                val label = when (targetLang) {
+                                    "ar" -> "Arabic عربي (auto-translated from $srcLabel)"
+                                    "en" -> "English (auto-translated from $srcLabel)"
+                                    else -> "Auto: $baseLangCode → $targetLang"
+                                }
+                                autoSubs.add(Triple(label, autoUrl, targetLang))
                             }
                         }
                     }
@@ -1613,9 +1567,9 @@ override suspend fun load(url: String): LoadResponse {
                     explicitSubs.filter { it.third == "ar" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
                     explicitSubs.filter { it.third == "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
                     explicitSubs.filter { it.third != "ar" && it.third != "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
-                    autoSubs.filter { it.first.endsWith("→ ar") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
-                    autoSubs.filter { it.first.endsWith("→ en") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
-                    autoSubs.filter { !it.first.endsWith("→ ar") && !it.first.endsWith("→ en") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { it.third == "ar" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { it.third == "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { it.third != "ar" && it.third != "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
                 }
             }
         } catch (e: Exception) {
