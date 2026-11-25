@@ -3,8 +3,6 @@ package com.example
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
-import kotlinx.coroutines.sync.Semaphore
-import kotlinx.coroutines.sync.withPermit
 
 class MyCimaProvider : MainAPI() {
     override var mainUrl = "https://wecimas.live"
@@ -89,38 +87,20 @@ class MyCimaProvider : MainAPI() {
     }
 
     // wecimas.live builds each listing page in 1.5-3s and gets much slower when many are requested
-    // at once (8 in parallel took 7-10s each), while the home screen asks for every row together.
-    // So: at most 3 listing requests at a time, a long timeout, one retry and a short cache.
+    // at once, while the home screen asks for every row together. ListingLoader limits that to 3 at a
+    // time, retries once, never throws, bounds the whole call and caches only larger good pages.
     private companion object {
-        val gate = Semaphore(3)
-        val cache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, List<SearchResponse>>>()
-        const val CACHE_MS = 10 * 60 * 1000L
+        val listings = ListingLoader<SearchResponse>()
     }
 
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val pageUrl = if (page > 1) "${request.data.trimEnd('/')}/page/$page/" else request.data
-        cache[pageUrl]?.let { (at, items) ->
-            if (System.currentTimeMillis() - at < CACHE_MS) return newHomePageResponse(request.name, items, items.isNotEmpty())
+        val home = listings.load(pageUrl) {
+            app.get(pageUrl, timeout = 20L).document
+                .select("div.Grid--WecimaPosts div.GridItem")
+                .mapNotNull { it.toSearchResult() }
+                .distinctBy { it.url }
         }
-        val home = gate.withPermit {
-            var items: List<SearchResponse> = emptyList()
-            for (attempt in 1..2) {
-                items = try {
-                    app.get(pageUrl, timeout = 20L).document
-                        .select("div.Grid--WecimaPosts div.GridItem")
-                        .mapNotNull { it.toSearchResult() }
-                        .distinctBy { it.url }
-                } catch (e: kotlinx.coroutines.CancellationException) {
-                    throw e
-                } catch (_: Exception) {
-                    emptyList()
-                }
-                if (items.isNotEmpty()) break
-            }
-            items
-        }
-        // only cache a full-looking page, so a failed or truncated response is never remembered
-        if (home.size >= 10) cache[pageUrl] = System.currentTimeMillis() to home
         return newHomePageResponse(request.name, home, home.isNotEmpty())
     }
 
