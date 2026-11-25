@@ -34,3 +34,15 @@ android {
         viewBinding = true
     }
 }
+
+dependencies {
+    testImplementation("org.robolectric:robolectric:4.18.1")
+    testImplementation(files(System.getProperty("user.home") + "/.gradle/caches/cloudstream/cloudstream/cloudstream.jar"))
+}
+dependencies {
+    testImplementation("org.jetbrains.kotlinx:kotlinx-serialization-json:1.7.3")
+    testImplementation("dev.whyoleg.cryptography:cryptography-core:0.4.0")
+    testImplementation("io.coil-kt.coil3:coil-core:3.1.0")
+    testRuntimeOnly("dev.whyoleg.cryptography:cryptography-provider-jdk:0.4.0")
+}
+tasks.withType<Test>().configureEach { maxHeapSize = "512m" }
