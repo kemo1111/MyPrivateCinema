@@ -23,6 +23,8 @@ class CimaTimeProvider : MainAPI() {
     override val supportedTypes = setOf(TvType.Movie, TvType.TvSeries)
 
     override val mainPage = mainPageOf(
+        "$mainUrl/movies.php" to "أحدث الأفلام",
+        "$mainUrl/category.php?cat=arabic-movies" to "أفلام عربي",
         "$mainUrl/category.php?cat=english-movies" to "أفلام أجنبية",
         "$mainUrl/category.php?cat=english-series" to "مسلسلات أجنبية",
         "$mainUrl/newvideos.php" to "الجديد"
