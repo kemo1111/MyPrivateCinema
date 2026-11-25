@@ -3,6 +3,8 @@ package com.example
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
 import org.jsoup.nodes.Element
+import kotlinx.coroutines.sync.Semaphore
+import kotlinx.coroutines.sync.withPermit
 
 class MyCimaProvider : MainAPI() {
     override var mainUrl = "https://wecimas.live"
@@ -86,12 +88,36 @@ class MyCimaProvider : MainAPI() {
         }
     }
 
+    // wecimas.live builds each listing page in 1.5-3s and gets much slower when many are requested
+    // at once (8 in parallel took 7-10s each), while the home screen asks for every row together.
+    // So: at most 3 listing requests at a time, a long timeout, one retry and a short cache.
+    private companion object {
+        val gate = Semaphore(3)
+        val cache = java.util.concurrent.ConcurrentHashMap<String, Pair<Long, List<SearchResponse>>>()
+        const val CACHE_MS = 10 * 60 * 1000L
+    }
+
     override suspend fun getMainPage(page: Int, request: MainPageRequest): HomePageResponse {
         val pageUrl = if (page > 1) "${request.data.trimEnd('/')}/page/$page/" else request.data
-        val document = app.get(pageUrl).document
-        val home = document.select("div.Grid--WecimaPosts div.GridItem")
-            .mapNotNull { it.toSearchResult() }
-            .distinctBy { it.url }
+        cache[pageUrl]?.let { (at, items) ->
+            if (System.currentTimeMillis() - at < CACHE_MS) return newHomePageResponse(request.name, items, items.isNotEmpty())
+        }
+        val home = gate.withPermit {
+            var items: List<SearchResponse> = emptyList()
+            for (attempt in 1..2) {
+                items = try {
+                    app.get(pageUrl, timeout = 40L).document
+                        .select("div.Grid--WecimaPosts div.GridItem")
+                        .mapNotNull { it.toSearchResult() }
+                        .distinctBy { it.url }
+                } catch (_: Exception) {
+                    emptyList()
+                }
+                if (items.isNotEmpty()) break
+            }
+            items
+        }
+        if (home.isNotEmpty()) cache[pageUrl] = System.currentTimeMillis() to home
         return newHomePageResponse(request.name, home, home.isNotEmpty())
     }
 
