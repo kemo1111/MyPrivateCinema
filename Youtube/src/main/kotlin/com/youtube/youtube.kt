@@ -49,6 +49,45 @@ class YoutubeProvider(
 
     private var isSearchContext = false
 
+    // v4 helpers: shorts visibility, upcoming premieres filter, duration parsing.
+    private fun isShortsEnabled(): Boolean = sharedPref?.getBoolean("show_shorts", true) != false
+
+    // v4: category-row fallback queries, used when a topic channel page serves no videos.
+    private val categorySearchFallback = mapOf(
+        "UCOpNcN46UbXVtpKMrmU4Abg" to "ألعاب",
+        "UC-9-kyTW8ZkZNDHQJ6FgpwQ" to "موسيقى",
+        "UC4R8DWoMoI7CAwX8_LjQHig" to "بث مباشر",
+        "UCYfdidRxbB8Qhf0Nx7ioOYw" to "أخبار"
+    )
+
+    private fun hideUpcoming(): Boolean = sharedPref?.getBoolean("hide_upcoming", true) != false
+
+    // v4: parse a YouTube view-count text ("1,234,567 views" or "1.2M مشاهدة") to a raw number.
+    private fun parseViewsToLong(text: String?): Long? {
+        if (text.isNullOrBlank()) return null
+        val t = text.trim()
+        val compact = Regex("""([\d.,]+)\s*([KMB])""", RegexOption.IGNORE_CASE).find(t)
+        if (compact != null) {
+            val num = compact.groupValues[1].replace(",", "").toDoubleOrNull() ?: return null
+            val mult = when (compact.groupValues[2].uppercase()) {
+                "K" -> 1_000L; "M" -> 1_000_000L; else -> 1_000_000_000L
+            }
+            return (num * mult).toLong()
+        }
+        val digits = t.filter { it.isDigit() }
+        return digits.toLongOrNull()
+    }
+
+    private fun parseDurationToMinutes(text: String?): Int? {
+        if (text.isNullOrBlank()) return null
+        val parts = text.trim().split(":").mapNotNull { it.trim().toIntOrNull() }
+        if (parts.isEmpty()) return null
+        var seconds = 0
+        for (p in parts) seconds = seconds * 60 + p
+        if (seconds <= 0) return null
+        return (seconds + 59) / 60
+    }
+
 
     class YouTubeInterceptor(private val prefs: SharedPreferences?) : Interceptor {
         override fun intercept(chain: Interceptor.Chain): Response {
@@ -249,6 +288,12 @@ class YoutubeProvider(
                 val views = formatViews(viewText)
                 val finalTitle =
                     if (channel.isNotBlank()) "{$channel | $views} $title" else "{$views} $title"
+                if (hideUpcoming()) {
+                    val publishedText = getText(videoData.getMapKey("publishedTimeText"))
+                    if (videoData.containsKey("upcomingEventData") || publishedText.contains("Scheduled") || publishedText.contains("Premiere") || publishedText.contains("مجدول") || publishedText.contains("قادم")) {
+                        return null
+                    }
+                }
                 var poster = getBestThumbnail(videoData.getMapKey("thumbnail"))
                 if (poster.isNullOrBlank()) poster = buildThumbnailFromId(videoId)
                 return newMovieSearchResponse(
@@ -265,7 +310,7 @@ class YoutubeProvider(
             ?: renderer.getMapKey("shortsLockupViewModel")
             ?: richContent?.getMapKey("shortsLockupViewModel")
 
-        if (shortsData != null) {
+        if (shortsData != null && isShortsEnabled()) {
             val onTap = shortsData.getMapKey("onTap")
             val videoId = onTap?.getMapKey("innertubeCommand")?.getMapKey("reelWatchEndpoint")
                 ?.getString("videoId")
@@ -376,6 +421,9 @@ class YoutubeProvider(
                 val finalTitle: String
                 val poster: String
 
+                if (isShorts && !isShortsEnabled()) {
+                    return null
+                }
                 if (isShorts) {
                     val currentList = if (isSearchContext) searchShorts else homeShorts
                     val episodeNum = currentList.size + 1
@@ -537,6 +585,23 @@ class YoutubeProvider(
                 list.add(MainPageData(if (isEn) "Trending" else "الرئيسية (Trending)", "Home"))
             }
 
+            // v4: built-in YouTube category rows (topic channels, scraped like custom channel sections).
+            if (sharedPref?.getBoolean("show_categories_home", true) != false) {
+                list.add(MainPageData(if (isEn) "Gaming" else "ألعاب (Gaming)", "$mainUrl/channel/UCOpNcN46UbXVtpKMrmU4Abg"))
+                list.add(MainPageData(if (isEn) "Music" else "موسيقى (Music)", "$mainUrl/channel/UC-9-kyTW8ZkZNDHQJ6FgpwQ"))
+                list.add(MainPageData(if (isEn) "Live now" else "بث مباشر (Live)", "$mainUrl/channel/UC4R8DWoMoI7CAwX8_LjQHig"))
+                list.add(MainPageData(if (isEn) "News" else "أخبار (News)", "$mainUrl/channel/UCYfdidRxbB8Qhf0Nx7ioOYw"))
+            }
+
+            // v4: subscriptions + watch-history feed rows, only when the optional cookie login exists.
+            val hasLoginCookies = !sharedPref?.getString("SID", null).isNullOrBlank()
+            if (hasLoginCookies && sharedPref?.getBoolean("show_subscriptions_home", true) != false) {
+                list.add(MainPageData(if (isEn) "My Subscriptions" else "اشتراكاتي (Subscriptions)", "$mainUrl/feed/subscriptions"))
+            }
+            if (hasLoginCookies && sharedPref?.getBoolean("show_history_home", true) != false) {
+                list.add(MainPageData(if (isEn) "Watch History" else "سجل المشاهدة (History)", "$mainUrl/feed/history"))
+            }
+
             val customSections = getCustomHomepages()
 
             customSections.filter { it.isEnabled }.forEach { section ->
@@ -639,7 +704,7 @@ class YoutubeProvider(
                 if (cleanUrl.contains("?") && !isPlaylist) cleanUrl = cleanUrl.substringBefore("?")
 
                 val targetUrl = when {
-                    requestData.startsWith("http") && !isPlaylist && !cleanUrl.endsWith("/videos") -> "$cleanUrl/videos"
+                    requestData.startsWith("http") && !isPlaylist && !cleanUrl.endsWith("/videos") && !cleanUrl.contains("/feed/") -> "$cleanUrl/videos"
                     requestData.startsWith("http") -> requestData
                     else -> mainUrl
                 }
@@ -673,6 +738,20 @@ class YoutubeProvider(
                     } else {
                         processRecursive(initialData, results, seenIds, playlistMode = false)
                         nextContinuation = findTokenRecursive(initialData)
+
+                        // v4: bounded fallback — a category row whose topic page served no videos
+                        // gets one search scrape for its category query instead of staying empty.
+                        if (results.isEmpty() && requestData.startsWith("http")) {
+                            val fallbackQuery = categorySearchFallback.entries.firstOrNull { requestData.contains(it.key) }?.value
+                            if (fallbackQuery != null) {
+                                try {
+                                    val searchHtml = app.get("$mainUrl/results?search_query=${URLEncoder.encode(fallbackQuery, "utf-8")}", interceptor = ytInterceptor).text
+                                    extractYtInitialData(searchHtml)?.let { processRecursive(it, results, seenIds, playlistMode = false) }
+                                } catch (e: Exception) {
+                                    logError(e)
+                                }
+                            }
+                        }
                     }
                 }
             } else {
@@ -730,6 +809,58 @@ class YoutubeProvider(
 
         return newHomePageResponse(request, results, hasNext = !nextContinuation.isNullOrBlank())
     }
+    // v4: find a shelf whose title contains one of the keywords (e.g. "Popular videos").
+    private fun findShelfByTitle(data: Any?, titleKeywords: List<String>): Map<*, *>? {
+        when (data) {
+            is Map<*, *> -> {
+                val shelf = data["shelfRenderer"] ?: data["gridShelfViewModel"]
+                if (shelf is Map<*, *>) {
+                    val titleText = getText(shelf["title"]).ifBlank {
+                        getText(safeGet(shelf, "header", "shelfHeaderRenderer", "title"))
+                    }.lowercase()
+                    if (titleText.isNotBlank() && titleKeywords.any { titleText.contains(it) }) {
+                        return shelf
+                    }
+                }
+                for (v in data.values) {
+                    val r = findShelfByTitle(v, titleKeywords)
+                    if (r != null) return r
+                }
+            }
+            is List<*> -> {
+                for (i in data) {
+                    val r = findShelfByTitle(i, titleKeywords)
+                    if (r != null) return r
+                }
+            }
+        }
+        return null
+    }
+
+    // v4: find the first list whose entries are video lockups/renderers (a browse tab's grid).
+    private fun findVideoItemList(data: Any?): List<*>? {
+        when (data) {
+            is Map<*, *> -> {
+                for (v in data.values) {
+                    if (v is List<*> && v.any { it is Map<*, *> && (it.containsKey("lockupViewModel") || it.containsKey("videoRenderer") || it.containsKey("richItemRenderer")) }) {
+                        return v
+                    }
+                }
+                for (v in data.values) {
+                    val r = findVideoItemList(v)
+                    if (r != null) return r
+                }
+            }
+            is List<*> -> {
+                for (i in data) {
+                    val r = findVideoItemList(i)
+                    if (r != null) return r
+                }
+            }
+        }
+        return null
+    }
+
     fun findContinuationItemsRecursive(obj: Any?): List<*>? {
         when (obj) {
             is Map<*, *> -> {
@@ -776,6 +907,8 @@ class YoutubeProvider(
         isSearchContext = true
         if (page == 1) {
             searchShorts.clear()
+            // v4: pasting a YouTube video/channel/playlist URL into search opens it directly.
+            resolveDirectUrl(query.trim())?.let { return newSearchResponseList(listOf(it), false) }
         }
 
 
@@ -790,6 +923,11 @@ class YoutubeProvider(
             actualQuery = query.replace(playlistTag, "").trim()
             playlistMode = true
             spParam = "&sp=EgIQAw%3D%3D"
+        }
+        if (spParam.isEmpty()) {
+            // v4: optional search filter from settings (sort/date/duration/live).
+            val searchFilter = sharedPref?.getString("search_filter", "") ?: ""
+            if (searchFilter.isNotBlank()) spParam = "&sp=$searchFilter"
         }
 
         try {
@@ -838,6 +976,33 @@ class YoutubeProvider(
     }
 
     private val collectedShorts = mutableListOf<Episode>()
+
+    // v4: resolve a pasted YouTube URL to a directly openable card.
+    private fun resolveDirectUrl(query: String): SearchResponse? {
+        if (!query.contains("youtube.com") && !query.contains("youtu.be")) return null
+        return when {
+            query.contains("list=") -> {
+                val playlistId = query.substringAfter("list=").substringBefore("&").trim()
+                if (playlistId.isBlank()) null else newTvSeriesSearchResponse(
+                    "YouTube Playlist",
+                    "$mainUrl/playlist?list=$playlistId",
+                    TvType.TvSeries
+                )
+            }
+            query.contains("/shorts/") || query.contains("watch?v=") || query.contains("youtu.be/") -> {
+                val videoId = Regex("""(?:v=|youtu\.be/|shorts/)([A-Za-z0-9_-]{11})""")
+                    .find(query)?.groupValues?.getOrNull(1)
+                if (videoId.isNullOrBlank()) null else newMovieSearchResponse(
+                    "YouTube Video",
+                    "$mainUrl/watch?v=$videoId",
+                    TvType.Movie
+                ) { this.posterUrl = buildThumbnailFromId(videoId) }
+            }
+            query.contains("/@") || query.contains("/channel/") || query.contains("/c/") || query.contains("/user/") ->
+                newMovieSearchResponse("YouTube Channel", query, TvType.Live)
+            else -> null
+        }
+    }
 
 
 
@@ -919,8 +1084,9 @@ override suspend fun load(url: String): LoadResponse {
                     ?: safeGet(header, "metadata", "pageHeaderViewModel", "metadata", "contentMetadataViewModel", "metadataRows", 1, "metadataParts", 0, "text", "content") as? String
 
                 val allEpisodes = mutableListOf<Episode>()
+                val rawViews = mutableMapOf<String, Long>()
 
-                fun extractVideosFromItems(items: List<*>, collectTo: MutableList<Episode>) {
+                fun extractVideosFromItems(items: List<*>, collectTo: MutableList<Episode>, namePrefix: String = "", rawViews: MutableMap<String, Long>? = null) {
                     items.forEach { item ->
                         val map = item as? Map<*, *> ?: return@forEach
                         val richContent = safeGet(map, "richItemRenderer", "content") as? Map<*, *>
@@ -934,9 +1100,10 @@ override suspend fun load(url: String): LoadResponse {
                                 val sources = safeGet(lockup, "contentImage", "thumbnailViewModel", "image", "sources") as? List<*>
                                 val thumb = getBestThumbnail(sources) ?: buildThumbnailFromId(vId)
                                 val (_, views) = extractLockupMetadata(lockup)
+                                parseViewsToLong(views)?.let { rawViews?.put(vId, it) }
 
                                 collectTo.add(newEpisode("$mainUrl/watch?v=$vId") {
-                                    this.name = vidTitle
+                                    this.name = namePrefix + vidTitle
                                     this.posterUrl = thumb
                                     this.description = if (views.isNotBlank()) "Views: $views" else null
                                 })
@@ -962,13 +1129,16 @@ override suspend fun load(url: String): LoadResponse {
                                 ?: extractTitle(videoRenderer.getMapKey("headline"))
                                 ?: "Video"
                             val thumb = getBestThumbnail(videoRenderer["thumbnail"]) ?: buildThumbnailFromId(vId)
-                            val viewCount = formatViews(safeGet(videoRenderer, "viewCountText", "simpleText") as? String)
+                            val rawViewText = safeGet(videoRenderer, "viewCountText", "simpleText") as? String
+                            val viewCount = formatViews(rawViewText)
+                            parseViewsToLong(rawViewText)?.let { rawViews?.put(vId, it) }
                             val publishedTime = extractTitle(safeGet(videoRenderer, "publishedTimeText") as? Map<*, *>)
 
                             collectTo.add(newEpisode("$mainUrl/watch?v=$vId") {
-                                this.name = vidTitle
+                                this.name = namePrefix + vidTitle
                                 this.posterUrl = thumb
                                 this.description = listOfNotNull(viewCount, publishedTime).joinToString(" • ")
+                                this.runTime = parseDurationToMinutes(extractTitle(safeGet(videoRenderer, "lengthText") as? Map<*, *>))
                             })
                         }
                     }
@@ -1005,7 +1175,7 @@ override suspend fun load(url: String): LoadResponse {
                 }
 
                 if (initialItems != null) {
-                    extractVideosFromItems(initialItems, allEpisodes)
+                    extractVideosFromItems(initialItems, allEpisodes, "", rawViews)
                 }
 
                 var currentToken: String? = findContinuationTokenFromItems(initialItems)
@@ -1035,7 +1205,7 @@ override suspend fun load(url: String): LoadResponse {
                         val headers = mapOf("X-Youtube-Client-Name" to "WEB", "X-Youtube-Client-Version" to clientVersion)
                         val jsonResponse = app.post(apiUrl, json = payload, headers = headers, interceptor = ytInterceptor).parsedSafe<Map<String, Any>>() ?: break
                         val continuationItems = findContinuationItemsRecursive(jsonResponse) ?: break
-                        extractVideosFromItems(continuationItems, allEpisodes)
+                        extractVideosFromItems(continuationItems, allEpisodes, "", rawViews)
                         currentToken = findContinuationTokenFromItems(continuationItems)
                         kotlinx.coroutines.delay((SLEEP_BETWEEN * 10).toLong())
                     } catch (e: Exception) {
@@ -1043,9 +1213,79 @@ override suspend fun load(url: String): LoadResponse {
                     }
                 }
 
-                return newTvSeriesLoadResponse(title, url, TvType.TvSeries, allEpisodes) {
+                // v4: "most viewed first". Primary: the channel's full Popular TAB — located via
+                // the home page Popular shelf's endpoint params, then fetched through the browse
+                // API (one bounded call). Secondary: the shelf's own items. Fallback: sort the
+                // fetched episodes by parsed view counts (most-viewed among fetched pages only).
+                var finalEpisodes = allEpisodes
+                if (sharedPref?.getBoolean("channel_popular_first", true) != false) {
+                    var merged = false
+                    try {
+                        val baseHtml = app.get(url.removeSuffix("/videos"), interceptor = ytInterceptor).text
+                        val baseData = extractYtInitialData(baseHtml)
+                        val shelf = findShelfByTitle(baseData, listOf("popular", "شائع", "الأكثر مشاهدة"))
+                        if (shelf != null) {
+                            val popularEpisodes = mutableListOf<Episode>()
+                            val shelfParams = safeGet(shelf, "endpoint", "browseEndpoint", "params") as? String
+                            val shelfBrowseId = safeGet(shelf, "endpoint", "browseEndpoint", "browseId") as? String
+                            var tabItems: List<*>? = null
+                            if (!shelfParams.isNullOrBlank() && !shelfBrowseId.isNullOrBlank() && !apiKey.isNullOrBlank()) {
+                                val popularResponse = app.post(
+                                    "$mainUrl/youtubei/v1/browse?key=$apiKey",
+                                    json = mapOf(
+                                        "context" to mapOf(
+                                            "client" to mapOf(
+                                                "clientName" to "WEB",
+                                                "clientVersion" to clientVersion,
+                                                "visitorData" to (visitorData ?: ""),
+                                                "platform" to "DESKTOP"
+                                            )
+                                        ),
+                                        "browseId" to shelfBrowseId,
+                                        "params" to shelfParams
+                                    ),
+                                    headers = mapOf("X-Youtube-Client-Name" to "WEB", "X-Youtube-Client-Version" to clientVersion),
+                                    interceptor = ytInterceptor
+                                ).parsedSafe<Map<String, Any>>()
+                                if (popularResponse != null) tabItems = findVideoItemList(popularResponse)
+                            }
+                            val shelfItems = tabItems
+                                ?: (shelf["items"] ?: shelf["contents"]
+                                    ?: safeGet(shelf, "content", "horizontalListRenderer", "items")
+                                    ?: safeGet(shelf, "content", "gridRenderer", "items")) as? List<*>
+                            if (shelfItems != null) {
+                                extractVideosFromItems(shelfItems, popularEpisodes, "🔥 ", rawViews)
+                            }
+                            if (popularEpisodes.isNotEmpty()) {
+                                val popularUrls = popularEpisodes.map { it.data }.toSet()
+                                finalEpisodes = (popularEpisodes + (allEpisodes.filter { it.data !in popularUrls })).toMutableList()
+                                merged = true
+                            }
+                        }
+                    } catch (e: Exception) {
+                        Log.e(name, "Channel popular fetch failed", e)
+                    }
+                    if (!merged && rawViews.size >= 2) {
+                        // Fallback: most-viewed among the fetched pages only (not a global ranking).
+                        finalEpisodes = allEpisodes.sortedByDescending { ep ->
+                            rawViews[ep.data.extractYoutubeId()] ?: -1L
+                        }.toMutableList()
+                    }
+                }
+
+                // v4: channel banner + about text.
+                val banner = getBestThumbnail(safeGet(header, "banner"))
+                    ?: getBestThumbnail(safeGet(header, "content", "pageHeaderViewModel", "banner", "imageBannerViewModel", "image", "sources"))
+                    ?: getBestThumbnail(safeGet(header, "tvBanner"))
+                val channelDescription = channelMeta?.getString("description")
+
+                return newTvSeriesLoadResponse(title, url, TvType.TvSeries, finalEpisodes) {
                     this.posterUrl = poster
-                    this.plot = "Channel: $title\nSubscribers: ${subscriberCount ?: "N/A"}\nVideos Fetched: ${allEpisodes.size}"
+                    this.backgroundPosterUrl = banner
+                    this.plot = buildString {
+                        if (!channelDescription.isNullOrBlank()) append(channelDescription.trim()).append("\n\n")
+                        append("Channel: $title\nSubscribers: ${subscriberCount ?: "N/A"}")
+                    }
                     this.tags = listOf(title, "Channel")
                 }
 
@@ -1144,6 +1384,12 @@ override suspend fun load(url: String): LoadResponse {
         val html = response.text
         val data = extractYtInitialData(html)
 
+        // v4: duration/year/views/likes from the embedded player response (regex, fails soft).
+        val lengthSeconds = Regex(""""lengthSeconds"\s*:\s*"(\d+)"""").find(html)?.groupValues?.getOrNull(1)?.toLongOrNull()
+        val publishYear = Regex(""""publishDate"\s*:\s*"(\d{4})-\d{2}-\d{2}"""").find(html)?.groupValues?.getOrNull(1)?.toIntOrNull()
+        val viewCountRaw = Regex(""""viewCount"\s*:\s*"(\d+)"""").find(html)?.groupValues?.getOrNull(1)?.toLongOrNull()
+        val likesText = Regex(""""label"\s*:\s*"([\d.,KMB]+)\s+likes?"""").find(html)?.groupValues?.getOrNull(1)
+
         var title = "YouTube Video"
         var plot = ""
         var poster = buildThumbnailFromId(videoId)
@@ -1215,13 +1461,21 @@ override suspend fun load(url: String): LoadResponse {
 
         val filteredRecs = recommendations.filter { !it.url.contains("/shorts/") }
 
+        // v4: prepend a stats line (views/likes) to the description when available.
+        val statsParts = mutableListOf<String>()
+        if (viewCountRaw != null) statsParts.add("Views: ${formatViews(viewCountRaw.toString())}")
+        if (!likesText.isNullOrBlank()) statsParts.add("Likes: $likesText")
+        val statsLine = statsParts.joinToString(" • ")
+
         return newMovieLoadResponse(title, url, TvType.Movie, videoId) {
             this.posterUrl = poster
-            this.plot = plot
+            this.plot = if (statsLine.isNotBlank()) "$statsLine\n\n$plot" else plot
             if (channelName.isNotBlank()) {
                 this.tags = listOf(channelName)
             }
             this.recommendations = filteredRecs
+            if (lengthSeconds != null && lengthSeconds > 0) this.duration = (lengthSeconds / 60).toInt().coerceAtLeast(1)
+            if (publishYear != null) this.year = publishYear
         }
     }
     
@@ -1299,6 +1553,10 @@ override suspend fun load(url: String): LoadResponse {
 
                 if (captionTracks != null && captionTracks.length() > 0) {
                     val seenSubs = mutableSetOf<String>()
+                    // v4: subtitles collected, labeled (CC human / ASR auto / Auto translated),
+                    // then emitted Arabic + English first.
+                    val explicitSubs = mutableListOf<Triple<String, String, String>>()
+                    val autoSubs = mutableListOf<Pair<String, String>>()
 
                     var baseTrack = captionTracks.optJSONObject(0)
                     var baseLangCode = ""
@@ -1323,8 +1581,8 @@ override suspend fun load(url: String): LoadResponse {
                         val vttUrl = "$url&fmt=vtt"
                         if (!seenSubs.contains(vttUrl)) {
                             seenSubs.add(vttUrl)
-                            val displayTitle = "$name ($lang)"
-                            subtitleCallback(SubtitleFile(displayTitle, vttUrl))
+                            val kindLabel = if (track.optString("kind", "") == "asr") "ASR" else "CC"
+                            explicitSubs.add(Triple("$name ($lang, $kindLabel)", vttUrl, lang))
                         }
                     }
                     if (baseUrl.isNotEmpty()) {
@@ -1346,14 +1604,22 @@ override suspend fun load(url: String): LoadResponse {
 
                             if (!seenSubs.contains(autoUrl)) {
                                 seenSubs.add(autoUrl)
-                                val displayName = "$baseLangCode → $targetLang"
-                                subtitleCallback(SubtitleFile(displayName, autoUrl))
+                                autoSubs.add("Auto: $baseLangCode → $targetLang" to autoUrl)
                             }
                         }
                     }
+
+                    // v4: Arabic + English first in the subtitle picker, each group labeled.
+                    explicitSubs.filter { it.third == "ar" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    explicitSubs.filter { it.third == "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    explicitSubs.filter { it.third != "ar" && it.third != "en" }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { it.first.endsWith("→ ar") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { it.first.endsWith("→ en") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
+                    autoSubs.filter { !it.first.endsWith("→ ar") && !it.first.endsWith("→ en") }.forEach { subtitleCallback(SubtitleFile(it.first, it.second)) }
                 }
             }
         } catch (e: Exception) {
+            logError(e)
         }
 
         return true

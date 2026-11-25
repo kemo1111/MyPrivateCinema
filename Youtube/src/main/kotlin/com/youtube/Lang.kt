@@ -83,7 +83,20 @@ object Loc {
             "edit_item" to "تعديل",
             "url_empty" to "الرابط لا يمكن أن يكون فارغاً",
             "browse_youtube" to "تصفح ليتعرف يوتيوب على تفضيلاتك",
-            "url_hint" to "الرابط (https://...)"
+            "url_hint" to "الرابط (https://...)",
+            "categories_home" to "أقسام يوتيوب الجاهزة (ألعاب، موسيقى، مباشر، أخبار)",
+            "subscriptions_home" to "قسم اشتراكاتي (يتطلب تسجيل دخول)",
+            "history_home" to "قسم سجل المشاهدة (يتطلب تسجيل دخول)",
+            "show_shorts" to "إظهار فيديوهات Shorts",
+            "hide_upcoming" to "إخفاء البثوث والعروض القادمة",
+            "channel_popular_first" to "عرض الأكثر شعبية أولاً في القنوات",
+            "search_filter_title" to "فلتر نتائج البحث",
+            "filter_relevance" to "الأكثر صلة",
+            "filter_newest" to "الأحدث",
+            "filter_views" to "الأكثر مشاهدة",
+            "filter_live" to "بث مباشر الآن",
+            "filter_short" to "قصيرة (أقل من 4 دقائق)",
+            "filter_long" to "طويلة (أكثر من 20 دقيقة)"
         ),
         "en" to mapOf(
             "lang_title" to "Language / اللغة",
@@ -130,7 +143,20 @@ object Loc {
             "edit_item" to "Edit Item",
             "url_empty" to "URL cannot be empty",
             "browse_youtube" to "Browse so YouTube can know your preferences",
-            "url_hint" to "URL (https://...)"
+            "url_hint" to "URL (https://...)",
+            "categories_home" to "Built-in YouTube rows (Gaming, Music, Live, News)",
+            "subscriptions_home" to "My Subscriptions row (requires login)",
+            "history_home" to "Watch history row (requires login)",
+            "show_shorts" to "Show Shorts videos",
+            "hide_upcoming" to "Hide upcoming streams and premieres",
+            "channel_popular_first" to "Show popular videos first on channels",
+            "search_filter_title" to "Search filter",
+            "filter_relevance" to "Relevance",
+            "filter_newest" to "Newest",
+            "filter_views" to "Most viewed",
+            "filter_live" to "Live now",
+            "filter_short" to "Short (under 4 minutes)",
+            "filter_long" to "Long (over 20 minutes)"
         ),
         "tr" to mapOf(
             "lang_title" to "Dil / Language",

@@ -104,6 +104,13 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
         private lateinit var homeCategory: PreferenceCategory
         private lateinit var manageChannelsPref: Preference
         private lateinit var trendingPref: SwitchPreferenceCompat
+        private lateinit var categoriesPref: SwitchPreferenceCompat
+        private lateinit var subsPref: SwitchPreferenceCompat
+        private lateinit var historyPref: SwitchPreferenceCompat
+        private lateinit var shortsPref: SwitchPreferenceCompat
+        private lateinit var searchFilterPref: ListPreference
+        private lateinit var popularFirstPref: SwitchPreferenceCompat
+        private lateinit var upcomingPref: SwitchPreferenceCompat
 
         override fun onCreatePreferences(savedInstanceState: Bundle?, rootKey: String?) {
             val ctx = requireContext()
@@ -117,6 +124,38 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
                 setDefaultValue(true)
             }
             homeCategory.addPreference(trendingPref)
+
+            // v4: these switches write explicitly to the plugin's own SharedPreferences,
+            // because the provider reads the "YouTube" prefs, not the default prefs.
+            categoriesPref = SwitchPreferenceCompat(ctx).apply {
+                key = "show_categories_home"
+                isChecked = sharedPref.getBoolean("show_categories_home", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("show_categories_home", newVal as Boolean).apply()
+                    true
+                }
+            }
+            homeCategory.addPreference(categoriesPref)
+
+            subsPref = SwitchPreferenceCompat(ctx).apply {
+                key = "show_subscriptions_home"
+                isChecked = sharedPref.getBoolean("show_subscriptions_home", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("show_subscriptions_home", newVal as Boolean).apply()
+                    true
+                }
+            }
+            homeCategory.addPreference(subsPref)
+
+            historyPref = SwitchPreferenceCompat(ctx).apply {
+                key = "show_history_home"
+                isChecked = sharedPref.getBoolean("show_history_home", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("show_history_home", newVal as Boolean).apply()
+                    true
+                }
+            }
+            homeCategory.addPreference(historyPref)
 
             manageChannelsPref = Preference(ctx).apply {
                 key = "manage_custom_channels"
@@ -239,12 +278,69 @@ class YoutubeSettingsBottomSheet(private val sharedPref: SharedPreferences) : Bo
             playlistTagPref.text = sharedPref.getString(KEY_PLAYLIST_TAG, "{p}")
             customCategory.addPreference(playlistTagPref)
 
+            searchFilterPref = ListPreference(ctx).apply {
+                key = "search_filter"
+                entryValues = arrayOf("", "CAI%3D", "CAM%3D", "EgJAAQ%3D%3D", "EgIYAQ%3D%3D", "EgIYAw%3D%3D")
+                setValue(sharedPref.getString("search_filter", "") ?: "")
+                summaryProvider = ListPreference.SimpleSummaryProvider.getInstance()
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putString("search_filter", newVal as String).apply()
+                    true
+                }
+            }
+            customCategory.addPreference(searchFilterPref)
+
+            shortsPref = SwitchPreferenceCompat(ctx).apply {
+                key = "show_shorts"
+                isChecked = sharedPref.getBoolean("show_shorts", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("show_shorts", newVal as Boolean).apply()
+                    true
+                }
+            }
+            customCategory.addPreference(shortsPref)
+
+            upcomingPref = SwitchPreferenceCompat(ctx).apply {
+                key = "hide_upcoming"
+                isChecked = sharedPref.getBoolean("hide_upcoming", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("hide_upcoming", newVal as Boolean).apply()
+                    true
+                }
+            }
+            customCategory.addPreference(upcomingPref)
+
+            popularFirstPref = SwitchPreferenceCompat(ctx).apply {
+                key = "channel_popular_first"
+                isChecked = sharedPref.getBoolean("channel_popular_first", true)
+                setOnPreferenceChangeListener { _, newVal ->
+                    sharedPref.edit().putBoolean("channel_popular_first", newVal as Boolean).apply()
+                    true
+                }
+            }
+            customCategory.addPreference(popularFirstPref)
+
             updateTexts()
         }
 
         private fun updateTexts() {
             homeCategory.title = Loc.getString(sharedPref, "home_section")
             trendingPref.title = Loc.getString(sharedPref, "trending")
+            categoriesPref.title = Loc.getString(sharedPref, "categories_home")
+            subsPref.title = Loc.getString(sharedPref, "subscriptions_home")
+            historyPref.title = Loc.getString(sharedPref, "history_home")
+            searchFilterPref.title = Loc.getString(sharedPref, "search_filter_title")
+            searchFilterPref.entries = arrayOf(
+                Loc.getString(sharedPref, "filter_relevance"),
+                Loc.getString(sharedPref, "filter_newest"),
+                Loc.getString(sharedPref, "filter_views"),
+                Loc.getString(sharedPref, "filter_live"),
+                Loc.getString(sharedPref, "filter_short"),
+                Loc.getString(sharedPref, "filter_long")
+            )
+            shortsPref.title = Loc.getString(sharedPref, "show_shorts")
+            upcomingPref.title = Loc.getString(sharedPref, "hide_upcoming")
+            popularFirstPref.title = Loc.getString(sharedPref, "channel_popular_first")
             manageChannelsPref.title = Loc.getString(sharedPref, "manage_channels")
             manageChannelsPref.summary = Loc.getString(sharedPref, "manage_channels_sum")
 

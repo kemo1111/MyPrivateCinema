@@ -4,6 +4,7 @@
 // with mention of the original repository). Original repository: https://github.com/Abodabodd/re-3arabi
 package com.youtube
 
+import com.lagradost.cloudstream3.ErrorLoadingException
 import com.lagradost.cloudstream3.SubtitleFile
 import com.lagradost.cloudstream3.mvvm.logError
 import com.lagradost.cloudstream3.newSubtitleFile
@@ -174,9 +175,26 @@ open class YoutubeExtractor : ExtractorApi() {
 
                 ytVideos[videoId] = builtLinks.toList()
 
-            } catch (e: Exception) { logError(e) }
+            } catch (e: Exception) {
+                logError(e)
+                // v4: surface a specific failure reason in the player instead of a silent "no links".
+                val msg = e.message ?: ""
+                val reason = when {
+                    e.javaClass.simpleName.contains("ReCaptcha", true) ||
+                        msg.contains("bot", true) || msg.contains("SIGN_IN", true) ||
+                        msg.contains("sign in", true) ->
+                        "YouTube blocked stream extraction (sign-in/bot check). Try a VPN or log in from the plugin settings."
+                    e.javaClass.simpleName.contains("ContentNotAvailable", true) ->
+                        "This video is unavailable (private, deleted, or region-locked)."
+                    else -> "Failed to extract video streams from YouTube."
+                }
+                throw ErrorLoadingException(reason)
+            }
         }
 
+        if (ytVideos[videoId].isNullOrEmpty()) {
+            throw ErrorLoadingException("No playable streams were returned by YouTube for this video.")
+        }
         ytVideos[videoId]?.forEach { callback(it) }
 
         ytVideosSubtitles[videoId]?.mapNotNull { ss ->
