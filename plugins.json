@@ -1,0 +1,49 @@
+[
+    {
+        "iconUrl": "https://upload.wikimedia.org/wikipedia/commons/2/2f/Korduene_Logo.png",
+        "fileHash": "sha256-a10b9cc11c1b2e7455bc28bba5f3e314f7dc468acb37bbd31217131717fdf519",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/kemo1111/MyPrivateCinema",
+        "fileSize": 260606,
+        "status": 1,
+        "language": "ar",
+        "authors": [
+            "Kemo"
+        ],
+        "tvTypes": [
+            "Movie",
+            "TvSeries",
+            "Anime"
+        ],
+        "version": 38,
+        "internalName": "ExampleProvider",
+        "description": "\u0625\u0636\u0627\u0641\u0627\u062a \u0643\u064a\u0645\u0648: TopCinema \u0648 MyCima \u0648 ArabSeed \u0648 Cima4U \u0648 FaselHD \u0648 EgyDead \u0648 Shahid4U \u0648 Akwam \u0648 GetCima",
+        "url": "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/builds/ExampleProvider.cs3",
+        "name": "ExampleProvider"
+    },
+    {
+        "iconUrl": "https://raw.githubusercontent.com/Abodabodd/Oldarabrepo/refs/heads/main/img/IMG_%D9%A2%D9%A0%D9%A2%D9%A5%D9%A1%D9%A2%D9%A0%D9%A6_%D9%A1%D9%A7%D9%A2%D9%A6%D9%A1%D9%A6.jpg",
+        "fileHash": "sha256-d9e55fd7cf162d3800e105a782d00b7ecc067b23d9d6a9f601812cc870ede5f3",
+        "apiVersion": 1,
+        "repositoryUrl": "https://github.com/kemo1111/MyPrivateCinema",
+        "fileSize": 133646,
+        "status": 1,
+        "language": "ar",
+        "authors": [
+            "Abodabodd"
+        ],
+        "tvTypes": [
+            "Movie",
+            "TvSeries",
+            "Live",
+            "Anime",
+            "Music",
+            "Documentary"
+        ],
+        "version": 11,
+        "internalName": "Youtube",
+        "description": "By Abodabodd - source: github.com/Abodabodd/re-3arabi",
+        "url": "https://raw.githubusercontent.com/kemo1111/MyPrivateCinema/builds/Youtube.cs3",
+        "name": "Youtube"
+    }
+]
