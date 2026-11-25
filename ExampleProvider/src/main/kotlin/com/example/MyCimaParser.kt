@@ -68,4 +68,6 @@ object MyCimaParser {
     fun servers(doc: Document): List<String> =
         doc.select("button.mc-server-btn[data-url]").map { it.attr("data-url").trim() }
             .filter { it.startsWith("http") }.distinct()
+
+    fun hasNext(doc: Document): Boolean = doc.selectFirst("link[rel=next]") != null
 }
