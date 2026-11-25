@@ -106,10 +106,12 @@ class MyCimaProvider : MainAPI() {
             var items: List<SearchResponse> = emptyList()
             for (attempt in 1..2) {
                 items = try {
-                    app.get(pageUrl, timeout = 40L).document
+                    app.get(pageUrl, timeout = 20L).document
                         .select("div.Grid--WecimaPosts div.GridItem")
                         .mapNotNull { it.toSearchResult() }
                         .distinctBy { it.url }
+                } catch (e: kotlinx.coroutines.CancellationException) {
+                    throw e
                 } catch (_: Exception) {
                     emptyList()
                 }
@@ -117,7 +119,8 @@ class MyCimaProvider : MainAPI() {
             }
             items
         }
-        if (home.isNotEmpty()) cache[pageUrl] = System.currentTimeMillis() to home
+        // only cache a full-looking page, so a failed or truncated response is never remembered
+        if (home.size >= 10) cache[pageUrl] = System.currentTimeMillis() to home
         return newHomePageResponse(request.name, home, home.isNotEmpty())
     }
 
