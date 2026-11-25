@@ -39,7 +39,7 @@ class YoutubeProvider(
     override var name = "YouTube"
     override val hasMainPage = true
     override var lang = "ar"
-    override val supportedTypes = setOf(TvType.Movie, TvType.Live)
+    override val supportedTypes = setOf(TvType.Movie, TvType.Live, TvType.TvSeries)
 
     companion object {
     }
@@ -441,7 +441,7 @@ class YoutubeProvider(
                 return newMovieSearchResponse(
                     "$title ($stats)",
                     "$mainUrl/channel/$id",
-                    TvType.Live
+                    TvType.TvSeries // v6: a channel is a collection, not a live stream
                 ) { this.posterUrl = poster }
             }
         }
@@ -966,7 +966,7 @@ class YoutubeProvider(
                 ) { this.posterUrl = buildThumbnailFromId(videoId) }
             }
             query.contains("/@") || query.contains("/channel/") || query.contains("/c/") || query.contains("/user/") ->
-                newMovieSearchResponse("YouTube Channel", query, TvType.Live)
+                newMovieSearchResponse("YouTube Channel", query, TvType.TvSeries)
             else -> null
         }
     }
@@ -1395,10 +1395,14 @@ override suspend fun load(url: String): LoadResponse {
         }
         if (channelName.isNotBlank() && channelId.isNotBlank()) {
             val channelUrlFull = if (channelId.startsWith("UC") || channelId.startsWith("@")) "$mainUrl/channel/$channelId" else "$mainUrl/$channelId"
+            // v6: the video page's first recommendation opens the author's channel page
+            // (newest uploads + Popular tab). Tapping it navigates in-app; there is no
+            // custom-button API on LoadResponse (grounded: MainAPI at the user's app commit).
+            val channelCardTitle = if (lang == "ar") "📺 القناة: $channelName" else "📺 Channel: $channelName"
             val channelCard = newMovieSearchResponse(
-                "Channel: $channelName",
+                channelCardTitle,
                 channelUrlFull,
-                TvType.Live
+                TvType.TvSeries
             ) {
                 this.posterUrl = channelAvatar
             }
