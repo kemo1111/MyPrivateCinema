@@ -22,6 +22,7 @@ class ExamplePlugin: Plugin() {
         registerMainAPI(EgyDeadProvider())
         registerMainAPI(Shahid4uProvider())
         registerMainAPI(AkwamProvider())
+        registerMainAPI(AflaamProvider())
 
         // Extractors needed by Akwam watch pages (stmruby/streamruby players)
         registerExtractorAPI(StreamRuby())
