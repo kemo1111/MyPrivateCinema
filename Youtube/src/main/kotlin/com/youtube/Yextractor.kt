@@ -142,34 +142,35 @@ open class YoutubeExtractor : ExtractorApi() {
 
                 for (video in videoOnlyList) {
                     if (audiosByLanguage.isNotEmpty()) {
-                        for (lang in orderedLangs) {
-                            val audios = audiosByLanguage[lang] ?: continue
-                            val bestAudioForLang = if (video.mimeType.contains("webm")) {
+                        // v7 (user-approved 14430214): ONE DASH link per quality; the kept audio
+                        // tracks (original first, then ar, then en) ride inside the manifest and
+                        // are switched from the player's own audio-track menu. The source list
+                        // stays quality-only; the app appends the quality string itself.
+                        val selectedAudios = orderedLangs.mapNotNull { lang ->
+                            val audios = audiosByLanguage[lang] ?: return@mapNotNull null
+                            if (video.mimeType.contains("webm")) {
                                 audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("webm") }.thenByDescending { it.bitrate }).firstOrNull()
                             } else {
                                 audios.sortedWith(compareByDescending<AudioInfo> { it.trackType == AudioTrackType.ORIGINAL }.thenByDescending { it.mimeType.contains("mp4") }.thenByDescending { it.bitrate }).firstOrNull()
                             }
+                        }
 
-                            if (bestAudioForLang != null) {
-                                val singleAudioList = listOf(bestAudioForLang)
-                                val dashXml = buildDashManifestXml(video, singleAudioList, durationSeconds)
-                                val localLink = registerManifestAndGetUrl(dashXml)
+                        if (selectedAudios.isNotEmpty()) {
+                            val dashXml = buildDashManifestXml(video, selectedAudios, durationSeconds)
+                            val localLink = registerManifestAndGetUrl(dashXml)
 
-                                if (localLink != null) {
-                                    val finalName = "${video.label} ($lang) ${video.label}"
-
-                                    builtLinks.add(
-                                        newExtractorLink(
-                                            this.name,
-                                            finalName,
-                                            localLink,
-                                            type = ExtractorLinkType.DASH
-                                        ) {
-                                            this.referer = mainUrl
-                                            this.quality = video.height
-                                        }
-                                    )
-                                }
+                            if (localLink != null) {
+                                builtLinks.add(
+                                    newExtractorLink(
+                                        this.name,
+                                        "source",
+                                        localLink,
+                                        type = ExtractorLinkType.DASH
+                                    ) {
+                                        this.referer = mainUrl
+                                        this.quality = video.height
+                                    }
+                                )
                             }
                         }
                     }
@@ -183,9 +184,9 @@ open class YoutubeExtractor : ExtractorApi() {
                         Triple(mUrl, label, height)
                     } catch (e: Exception) { null }
                 }
-                for ((mUrl, mLabel, mHeight) in muxedList) {
+                for ((mUrl, _, mHeight) in muxedList) {
                     builtLinks.add(
-                        newExtractorLink(this.name, "$mLabel (Legacy)", mUrl, type = INFER_TYPE) {
+                        newExtractorLink(this.name, "source (legacy)", mUrl, type = INFER_TYPE) {
                             this.referer = mainUrl
                             this.quality = mHeight
                         }
@@ -216,13 +217,28 @@ open class YoutubeExtractor : ExtractorApi() {
         }
         ytVideos[videoId]?.forEach { callback(it) }
 
-        ytVideosSubtitles[videoId]?.mapNotNull { ss ->
+        var arabicAutoAdded = false
+        ytVideosSubtitles[videoId]?.forEach { ss ->
             try {
-                val lang = ss.locale?.language ?: return@mapNotNull null
-                val content = ss.content ?: ss.getUrl() ?: return@mapNotNull null
-                newSubtitleFile(lang, content)
+                val lang = ss.locale?.language ?: return@forEach
+                val content = ss.content ?: ss.getUrl() ?: return@forEach
+                subtitleCallback(newSubtitleFile(lang, content))
+                // v7: when the WEB player-API captions path is bot-walled, this NewPipe path is
+                // the only subtitle source and previously offered NO Arabic option (user report
+                // 14432257). YouTube's own timedtext endpoint serves auto-translations via the
+                // tlang parameter on any caption track, so emit an Arabic variant per track.
+                // Guarded (release owner): only for a real URL track (not inline content), only once
+                // per video, never when an Arabic or already-translated track exists.
+                val trackUrl = if (ss.content == null) ss.getUrl() else null
+                val hasArabic = ytVideosSubtitles[videoId]?.any { it.locale?.language == "ar" } == true
+                if (lang != "ar" && !hasArabic && !arabicAutoAdded && trackUrl != null &&
+                    trackUrl.contains("timedtext") && !trackUrl.contains("tlang=")) {
+                    val autoUrl = if (trackUrl.contains("?")) "$trackUrl&tlang=ar" else "$trackUrl?tlang=ar"
+                    subtitleCallback(newSubtitleFile("Arabic عربي (auto-translated from $lang)", autoUrl))
+                    arabicAutoAdded = true
+                }
             } catch (e: Exception) { null }
-        }?.forEach { subtitleCallback(it) }
+        }
     }
     @Synchronized
     private fun startServerIfNeeded() {
@@ -310,12 +326,23 @@ open class YoutubeExtractor : ExtractorApi() {
             val aMime = audio.mimeType
             val aCodecs = if (aMime.contains("webm")) "opus" else "mp4a.40.2"
 
+            // v7: real audio-track metadata so the player's audio menu can show and
+            // default correctly. lang only for real language codes; first track (the
+            // original) gets the main role, dubs get dub. Label matches the approved
+            // source / ar / en wording.
+            val aLang = audio.language.lowercase().takeIf { it.length == 2 }
+            val langAttr = if (aLang != null) " lang=\"$aLang\"" else ""
+            val role = if (index == 0) "main" else "dub"
+            val label = if (audio.trackType == AudioTrackType.ORIGINAL || audio.trackType == null) "source" else (aLang ?: "audio")
+
             val aSegmentBase = if (audio.initRange != null && audio.indexRange != null) {
                 """<SegmentBase indexRange="${audio.indexRange}"><Initialization range="${audio.initRange}" /></SegmentBase>"""
             } else ""
 
             sb.append("""
-                <AdaptationSet mimeType="$aMime" subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+                <AdaptationSet mimeType="$aMime"$langAttr subsegmentAlignment="true" subsegmentStartsWithSAP="1">
+                  <Role schemeIdUri="urn:mpeg:dash:role:2011" value="$role"/>
+                  <Label>$label</Label>
                   <Representation id="$audioId" bandwidth="${if(audio.bitrate>0) audio.bitrate else 128000}" codecs="$aCodecs">
                     <BaseURL>$cleanAudioUrl</BaseURL>
                     $aSegmentBase
