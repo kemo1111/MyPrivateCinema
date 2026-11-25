@@ -22,7 +22,7 @@ class CrossServersTest {
     private data class Site(val name: String, val plugin: String?)
     private val sites = listOf(
         Site("ArabSeed Kemo", "p"), Site("MyCima Kemo", "p"), Site("Akwam Kemo", "p"),
-        Site("Aflaam Kemo", "p"), Site("StreamPlay", "other")
+        Site("Aflaam Kemo", "p"), Site("CimaTime Kemo", "p"), Site("StreamPlay", "other")
     )
     private fun pick(self: String) =
         CrossServers.pickSiblings(self, "p", sites, { it.name }, { it.plugin }).map { it.name }
@@ -35,6 +35,12 @@ class CrossServersTest {
     @Test fun isolatedSiteSearchesNoSiblings() {
         assertTrue(CrossServers.isIsolated("MyCima Kemo"))
         assertEquals(emptyList<String>(), pick("MyCima Kemo"))
+    }
+    @Test fun cimaTimeIsIsolatedBothWays() {
+        assertTrue(CrossServers.isIsolated("CimaTime Kemo"))
+        assertEquals(emptyList<String>(), pick("CimaTime Kemo"))
+        assertFalse(pick("Akwam Kemo").contains("CimaTime Kemo"))
+        assertFalse(pick("Aflaam Kemo").contains("CimaTime Kemo"))
     }
     @Test fun otherSitesUnaffectedAndPluginScopeKept() {
         assertFalse(CrossServers.isIsolated("Akwam Kemo"))
