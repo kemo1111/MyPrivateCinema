@@ -40,6 +40,7 @@ class CrossServersTest {
         assertFalse(CrossServers.isIsolated("Akwam Kemo"))
         assertEquals(listOf("ArabSeed Kemo", "Aflaam Kemo"), pick("Akwam Kemo"))
         assertFalse(pick("Akwam Kemo").contains("StreamPlay"))
+    }
     @Test fun cimaTimeTitlesMatchOnlyTheSameFilm() {
         assertTrue(CrossServers.sameFilm("فيلم Batman The Dark Knight 2008 مترجم اون لاين", 2008, "Batman The Dark Knight", 2008))
         assertFalse(CrossServers.sameFilm("فيلم The Dark Knight Rises 2012 مترجم اون لاين", 2012, "Batman The Dark Knight", 2008))
