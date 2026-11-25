@@ -266,6 +266,8 @@ class YoutubeProvider(
             ?: richContent?.getMapKey("shortsLockupViewModel")
 
         if (shortsData != null) {
+            // Home/main-page rows hide Shorts; search keeps them (user request).
+            if (!isSearchContext) return null
             val onTap = shortsData.getMapKey("onTap")
             val videoId = onTap?.getMapKey("innertubeCommand")?.getMapKey("reelWatchEndpoint")
                 ?.getString("videoId")
@@ -377,6 +379,8 @@ class YoutubeProvider(
                 val poster: String
 
                 if (isShorts) {
+                    // Home/main-page rows hide Shorts; search keeps them (user request).
+                    if (!isSearchContext) return null
                     val currentList = if (isSearchContext) searchShorts else homeShorts
                     val episodeNum = currentList.size + 1
                     val contextTag = if (isSearchContext) "&ctx=search" else "&ctx=home"
@@ -574,6 +578,7 @@ class YoutubeProvider(
         val seenIds = mutableSetOf<String>()
         var nextContinuation: String? = null
 
+        isSearchContext = false // main-page rows are never search context
         val requestData = request.data
         val isPlaylist = requestData.contains("list=") || requestData.startsWith("playlist_")
         fun extractPlaylistVideos(items: List<*>) {
