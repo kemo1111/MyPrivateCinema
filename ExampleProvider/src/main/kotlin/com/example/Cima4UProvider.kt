@@ -474,6 +474,15 @@ class Cima4UProvider : MainAPI() {
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
+    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
+        loadLinksOwn(data, isCasting, sub, cb)
+    }
+
+    private suspend fun loadLinksOwn(
+        data: String,
+        isCasting: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ): Boolean {
         // Construct watch URL - ensure clean single slash before watch/
         val cleanData = data.replace(Regex("/+"), "/").replace("https:/", "https://").replace("http:/", "http://")

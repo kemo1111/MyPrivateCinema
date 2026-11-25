@@ -3,10 +3,14 @@ package com.example
 import android.content.Context
 import com.lagradost.cloudstream3.*
 import com.lagradost.cloudstream3.utils.*
-import kotlinx.coroutines.async
-import kotlinx.coroutines.awaitAll
+import kotlinx.coroutines.channels.Channel
+import kotlinx.coroutines.launch
 import kotlinx.coroutines.coroutineScope
+import kotlinx.coroutines.withContext
 import kotlinx.coroutines.withTimeoutOrNull
+import kotlin.coroutines.AbstractCoroutineContextElement
+import kotlin.coroutines.CoroutineContext
+import kotlin.coroutines.coroutineContext
 
 /** User-facing on/off switch, stored in plain SharedPreferences. Default: on. */
 object CrossServerSettings {
@@ -27,8 +31,13 @@ object CrossServerSettings {
  * this plugin for the same film and adds their servers, tagged with the site name.
  * Any sibling that fails, times out or has no confident match is skipped.
  */
+/** Marks calls made on behalf of another site, so those do not start their own search round. */
+private object InsideCrossSearch : AbstractCoroutineContextElement(Key) {
+    object Key : CoroutineContext.Key<InsideCrossSearch>
+}
+
 object CrossServers {
-    private const val PER_SITE_TIMEOUT_MS = 15_000L
+    private const val PER_SITE_TIMEOUT_MS = 25_000L
     private const val SEARCH_CANDIDATES = 5
 
     private val noise = listOf(
@@ -78,6 +87,28 @@ object CrossServers {
         }.getOrDefault(link)
     }
 
+    /**
+     * Runs a provider's own loadLinks, then (movies only, switch on) adds the same film's servers
+     * from the other sites. [data] must be the page URL that load() accepts; if load(data) is
+     * not a movie (for example an episode, or a site whose data is not a page URL), nothing is added.
+     */
+    suspend fun withSiblings(
+        self: MainAPI,
+        data: String,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit,
+        own: suspend ((SubtitleFile) -> Unit, (ExtractorLink) -> Unit) -> Boolean
+    ): Boolean {
+        val ok = own(subtitleCallback, callback)
+        runCatching {
+            if (CrossServerSettings.isEnabled() && coroutineContext[InsideCrossSearch.Key] == null) {
+                val movie = self.load(data) as? MovieLoadResponse
+                if (movie != null) addSiblingServers(self, movie.name, movie.year, subtitleCallback, callback)
+            }
+        }
+        return ok
+    }
+
     suspend fun addSiblingServers(
         self: MainAPI,
         title: String,
@@ -90,19 +121,24 @@ object CrossServers {
         val siblings = APIHolder.allProviders.toList().filter {
             it !== self && it.name != self.name && it.sourcePlugin != null && it.sourcePlugin == self.sourcePlugin
         }
-        val results = coroutineScope {
-            siblings.map { api ->
-                async {
-                    withTimeoutOrNull(PER_SITE_TIMEOUT_MS) {
+        if (siblings.isEmpty()) return
+        val seen = HashSet<String>()
+        coroutineScope {
+            val ch = Channel<Pair<String, List<ExtractorLink>>?>(siblings.size)
+            for (api in siblings) {
+                launch {
+                    val r = withTimeoutOrNull(PER_SITE_TIMEOUT_MS) {
                         runCatching { collectFrom(api, title, year, subtitleCallback) }.getOrNull()
                     }
+                    ch.send(r)
                 }
-            }.awaitAll()
-        }
-        val seen = HashSet<String>()
-        for (r in results) {
-            val (site, links) = r ?: continue
-            links.forEach { if (seen.add(it.url)) callback(tag(it, site)) }
+            }
+            // Emit each site's links as soon as that site finishes, from this coroutine only.
+            repeat(siblings.size) {
+                val r = ch.receive() ?: return@repeat
+                val (site, links) = r
+                links.forEach { if (seen.add(it.url)) callback(tag(it, site)) }
+            }
         }
     }
 
@@ -119,7 +155,7 @@ object CrossServers {
             if (!sameFilm(title, year, resp.name, resp.year)) continue
             val links = mutableListOf<ExtractorLink>()
             val ok = runCatching {
-                api.loadLinks(resp.dataUrl, false, subtitleCallback) { links.add(it) }
+                withContext(InsideCrossSearch) { api.loadLinks(resp.dataUrl, false, subtitleCallback) { links.add(it) } }
             }.getOrDefault(false)
             if (links.isNotEmpty()) return api.name.removeSuffix(" Kemo").trim() to links
             if (ok) return null

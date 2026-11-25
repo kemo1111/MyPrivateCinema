@@ -182,6 +182,15 @@ class Shahid4uProvider : MainAPI() {
         isCasting: Boolean,
         subtitleCallback: (SubtitleFile) -> Unit,
         callback: (ExtractorLink) -> Unit
+    ): Boolean = CrossServers.withSiblings(this, data, subtitleCallback, callback) { sub, cb ->
+        loadLinksOwn(data, isCasting, sub, cb)
+    }
+
+    private suspend fun loadLinksOwn(
+        data: String,
+        isCasting: Boolean,
+        subtitleCallback: (SubtitleFile) -> Unit,
+        callback: (ExtractorLink) -> Unit
     ): Boolean {
         // data may be a /film/ or /episode/ page or a direct /watch/ page.
         val sessionCookies = mutableMapOf<String, String>()
