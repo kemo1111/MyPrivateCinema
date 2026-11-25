@@ -24,9 +24,14 @@ class ExamplePlugin: Plugin() {
         registerMainAPI(AkwamProvider())
         registerMainAPI(AflaamProvider())
         registerMainAPI(CimaTimeProvider())
+        registerMainAPI(CimamixProvider())
 
         // Extractors needed by Akwam watch pages (stmruby/streamruby players)
         registerExtractorAPI(StreamRuby())
+        registerExtractorAPI(CimamixAnafast())
+        registerExtractorAPI(CimamixVidoba())
+        registerExtractorAPI(CimamixVidspeed())
+        registerExtractorAPI(CimamixUqload())
         registerExtractorAPI(StmRuby())
         registerExtractorAPI(RubyStream())
 
