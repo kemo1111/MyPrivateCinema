@@ -1,0 +1,875 @@
+<!doctype html>
+<html dir="rtl" lang="ar" data-theme-mode="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <meta name="color-scheme" content="light dark">
+    <script>try{const r=document.documentElement,m="dark",c=true,s=c?localStorage.getItem('cinema-theme'):null;r.dataset.themePreference=s?'user':m;r.dataset.theme=s||(m==='system'?(matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light'):m)}catch(e){document.documentElement.dataset.theme="dark"}</script>
+    <style id="c-design-settings">
+                :root{--c-accent:#e11d48;--c-accent-hover:#be123c;--c-on-accent:#ffffff;--c-success:#047857;--c-success-bg:#047857;--c-success-soft:rgba(5, 150, 105, .10);--c-success-border:rgba(4, 120, 87, .28);--c-on-success:#ffffff;--c-bg:#f4f6fa;--c-surface:#ffffff;--c-text:#101522;--c-muted:#667085;--c-border:#e2e8f0;--c-elevated:#f4f6fa;--c-header-text:#101522;--c-logo-bg:#e11d48;--c-logo-text:#ffffff;--c-section-title:#101522;--c-card-title:#101522;--c-footer:#ffffff;--c-footer-text:#667085;--c-accent-text:#d61c44;--c-surface-soft:#eef1f6;--c-accent-soft:rgba(225, 29, 72, 0.15);--c-accent-border:rgba(225, 29, 72, 0.45);--c-accent-shadow:rgba(225, 29, 72, 0.32);--c-border-soft:rgba(226, 232, 240, 0.72);--c-header-text-muted:rgba(16, 21, 34, 0.72);--c-surface-elevated:rgba(255, 255, 255, 0.96);--c-shadow:0 18px 50px rgba(15, 23, 42, .09);--c-accent-tint-15:rgba(225, 29, 72, 0.15);--c-accent-tint-20:rgba(225, 29, 72, 0.2);--c-accent-tint-25:rgba(225, 29, 72, 0.25);--c-accent-tint-32:rgba(225, 29, 72, 0.32);--c-accent-tint-35:rgba(225, 29, 72, 0.35);--c-accent-tint-38:rgba(225, 29, 72, 0.38);--c-accent-tint-42:rgba(225, 29, 72, 0.42);--c-accent-tint-45:rgba(225, 29, 72, 0.45);--c-accent-tint-50:rgba(225, 29, 72, 0.5);--c-accent-tint-65:rgba(225, 29, 72, 0.65);--c-accent-tint-70:rgba(225, 29, 72, 0.7);--c-border-tint-72:rgba(226, 232, 240, 0.72);--c-header-text-tint-72:rgba(16, 21, 34, 0.72);--c-surface-tint-96:rgba(255, 255, 255, 0.96);--c-font:system-ui, -apple-system, BlinkMacSystemFont, &quot;Segoe UI&quot;, sans-serif;}
+        html[data-theme="dark"]{--c-accent:#e11d48;--c-accent-hover:#be123c;--c-on-accent:#ffffff;--c-success:#6ee7b7;--c-success-bg:#047857;--c-success-soft:rgba(16, 185, 129, .14);--c-success-border:rgba(110, 231, 183, .38);--c-on-success:#ffffff;--c-bg:#070a11;--c-surface:#0d1320;--c-text:#f8fafc;--c-muted:#94a3b8;--c-border:#273244;--c-elevated:#070a11;--c-header-text:#f8fafc;--c-logo-bg:#e11d48;--c-logo-text:#ffffff;--c-section-title:#f8fafc;--c-card-title:#f8fafc;--c-footer:#0d1320;--c-footer-text:#94a3b8;--c-accent-text:#e63f63;--c-surface-soft:#131b2a;--c-accent-soft:rgba(225, 29, 72, 0.15);--c-accent-border:rgba(225, 29, 72, 0.45);--c-accent-shadow:rgba(225, 29, 72, 0.32);--c-border-soft:rgba(39, 50, 68, 0.72);--c-header-text-muted:rgba(248, 250, 252, 0.72);--c-surface-elevated:rgba(13, 19, 32, 0.96);--c-shadow:0 18px 55px rgba(0, 0, 0, .28);--c-accent-tint-15:rgba(225, 29, 72, 0.15);--c-accent-tint-20:rgba(225, 29, 72, 0.2);--c-accent-tint-25:rgba(225, 29, 72, 0.25);--c-accent-tint-32:rgba(225, 29, 72, 0.32);--c-accent-tint-35:rgba(225, 29, 72, 0.35);--c-accent-tint-38:rgba(225, 29, 72, 0.38);--c-accent-tint-42:rgba(225, 29, 72, 0.42);--c-accent-tint-45:rgba(225, 29, 72, 0.45);--c-accent-tint-50:rgba(225, 29, 72, 0.5);--c-accent-tint-65:rgba(225, 29, 72, 0.65);--c-accent-tint-70:rgba(225, 29, 72, 0.7);--c-border-tint-72:rgba(39, 50, 68, 0.72);--c-header-text-tint-72:rgba(248, 250, 252, 0.72);--c-surface-tint-96:rgba(13, 19, 32, 0.96);}
+            </style>
+    <meta name='robots' content='index, follow, max-image-preview:large, max-snippet:-1, max-video-preview:-1' />
+
+	<!-- This site is optimized with the Yoast SEO plugin v28.5 - https://yoast.com/product/yoast-seo-wordpress/ -->
+	<title>The Gentlemen</title>
+	<link rel="canonical" href="https://www.getcima.net/series/the-gentlemen/" />
+	<meta property="og:locale" content="ar_AR" />
+	<meta property="og:type" content="article" />
+	<meta property="og:title" content="The Gentlemen" />
+	<meta property="og:description" content="عندما يرث &quot;إيدي&quot; الأرستقراطي ملكية العائلة، يكتشف أنها موطن لإمبراطورية الأعشاب الضارة الهائلة - ولن يذهب أصحابها إلى أي مكان." />
+	<meta property="og:url" content="https://www.getcima.net/series/the-gentlemen/" />
+	<meta property="og:site_name" content="جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين" />
+	<meta property="article:modified_time" content="2026-10-25T02:10:40+00:00" />
+	<meta property="og:image" content="https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeexg0-4904yq.jpg" />
+	<meta property="og:image:width" content="342" />
+	<meta property="og:image:height" content="513" />
+	<meta property="og:image:type" content="image/jpeg" />
+	<meta name="twitter:card" content="summary_large_image" />
+	<script type="application/ld+json" class="yoast-schema-graph">{"@context":"https:\/\/schema.org","@graph":[{"@type":"WebPage","@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/","url":"https:\/\/www.getcima.net\/series\/the-gentlemen\/","name":"The Gentlemen","isPartOf":{"@id":"https:\/\/www.getcima.net\/#website"},"primaryImageOfPage":{"@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/#primaryimage"},"image":{"@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/#primaryimage"},"thumbnailUrl":"https:\/\/www.getcima.net\/wp-content\/uploads\/2026\/10\/iptv-poster-mvbeexg0-4904yq.jpg","datePublished":"2026-10-16T23:52:11+00:00","dateModified":"2026-10-25T02:10:40+00:00","breadcrumb":{"@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/#breadcrumb"},"inLanguage":"ar","potentialAction":[{"@type":"ReadAction","target":["https:\/\/www.getcima.net\/series\/the-gentlemen\/"]}]},{"@type":"ImageObject","inLanguage":"ar","@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/#primaryimage","url":"https:\/\/www.getcima.net\/wp-content\/uploads\/2026\/10\/iptv-poster-mvbeexg0-4904yq.jpg","contentUrl":"https:\/\/www.getcima.net\/wp-content\/uploads\/2026\/10\/iptv-poster-mvbeexg0-4904yq.jpg","width":342,"height":513,"caption":"The Gentlemen"},{"@type":"BreadcrumbList","@id":"https:\/\/www.getcima.net\/series\/the-gentlemen\/#breadcrumb","itemListElement":[{"@type":"ListItem","position":1,"name":"الرئيسية","item":"https:\/\/www.getcima.net\/"},{"@type":"ListItem","position":2,"name":"مسلسل","item":"https:\/\/www.getcima.net\/series\/"},{"@type":"ListItem","position":3,"name":"The Gentlemen"}]},{"@type":"WebSite","@id":"https:\/\/www.getcima.net\/#website","url":"https:\/\/www.getcima.net\/","name":"جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين","description":"جيت سيما Get Cima منصة لمشاهدة أحدث الأفلام والمسلسلات العربية والأجنبية والتركية المترجمة أون لاين بجودة عالية، مع مكتبة متجددة وأقسام متنوعة لعشاق السينما والمسلسلات.","publisher":{"@id":"https:\/\/www.getcima.net\/#organization"},"alternateName":"Get Cima","potentialAction":[{"@type":"SearchAction","target":{"@type":"EntryPoint","urlTemplate":"https:\/\/www.getcima.net\/?s={search_term_string}"},"query-input":{"@type":"PropertyValueSpecification","valueRequired":true,"valueName":"search_term_string"}}],"inLanguage":"ar"},{"@type":"Organization","@id":"https:\/\/www.getcima.net\/#organization","name":"جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين","alternateName":"Get Cima","url":"https:\/\/www.getcima.net\/","logo":{"@type":"ImageObject","inLanguage":"ar","@id":"https:\/\/www.getcima.net\/#\/schema\/logo\/image\/","url":"https:\/\/www.getcima.net\/wp-content\/uploads\/2026\/09\/cinema-logo.webp","contentUrl":"https:\/\/www.getcima.net\/wp-content\/uploads\/2026\/09\/cinema-logo.webp","width":512,"height":512,"caption":"جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين"},"image":{"@id":"https:\/\/www.getcima.net\/#\/schema\/logo\/image\/"}}]}</script>
+	<!-- / Yoast SEO plugin. -->
+
+
+<link rel='dns-prefetch' href='//www.googletagmanager.com' />
+<style id="wp-img-auto-sizes-contain-inline-css">
+img:is([sizes=auto i],[sizes^="auto," i]){contain-intrinsic-size:3000px 1500px}
+/*# sourceURL=wp-img-auto-sizes-contain-inline-css */
+</style>
+<style id="classic-theme-styles-inline-css">
+/*! This file is auto-generated */
+.wp-block-button__link{color:#fff;background-color:#32373c;border-radius:9999px;box-shadow:none;text-decoration:none;padding:calc(.667em + 2px) calc(1.333em + 2px);font-size:1.125em}.wp-block-file__button{background:#32373c;color:#fff;text-decoration:none}
+/*# sourceURL=/wp-includes/css/classic-themes.min.css */
+</style>
+<style id="wp-block-styles-placeholder-inline-css">
+:root { --wp-internal-comment: "Placeholder for wp_hoist_late_printed_styles() to replace with the block styles printed at wp_footer." }
+/*# sourceURL=wp-block-styles-placeholder-inline-css */
+</style>
+<style id="wp-global-styles-placeholder-inline-css">
+:root { --wp-internal-comment: "Placeholder for wp_hoist_late_printed_styles() to replace with the global-styles printed at wp_footer." }
+/*# sourceURL=wp-global-styles-placeholder-inline-css */
+</style>
+<link rel='stylesheet' id='cinema-frontend-css-0-css' href='https://www.getcima.net/wp-content/themes/getcinema/dist/frontend/assets/app-55fde33b.css' media='all' />
+<script id="cinema-google-analytics-js" src="https://www.googletagmanager.com/gtag/js?id=G-57YCF49N1S"></script>
+<script id="cinema-google-analytics-js-after">
+window.dataLayer=window.dataLayer||[];function gtag(){dataLayer.push(arguments);}gtag('js',new Date());gtag('config',"G-57YCF49N1S");
+//# sourceURL=cinema-google-analytics-js-after
+</script>
+<link rel="icon" href="https://www.getcima.net/wp-content/uploads/2026/09/cinema-logo-150x150.webp" sizes="32x32" />
+<link rel="icon" href="https://www.getcima.net/wp-content/uploads/2026/09/cinema-logo-300x300.webp" sizes="192x192" />
+<link rel="apple-touch-icon" href="https://www.getcima.net/wp-content/uploads/2026/09/cinema-logo-300x300.webp" />
+<meta name="msapplication-TileImage" content="https://www.getcima.net/wp-content/uploads/2026/09/cinema-logo-300x300.webp" />
+
+<link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png">
+<link rel="icon" type="image/png" sizes="32x32" href="/favicon-32x32.png">
+<link rel="icon" type="image/png" sizes="16x16" href="/favicon-16x16.png">
+<link rel="manifest" href="/site.webmanifest">
+</head>
+<body class="rtl wp-singular series-template-default single single-series postid-495 wp-embed-responsive wp-theme-getcinema c-design-cinema c-has-title-hero">
+    
+    <a class="fixed start-4 top-[-80px] z-[100] rounded-lg bg-[var(--c-accent)] px-4 py-3 font-bold text-[var(--c-on-accent)] focus:top-4" href="#main">الانتقال إلى المحتوى</a>
+    <header class="c-header c-header--overlay sticky top-0" data-site-header>
+    <div class="c-shell relative min-h-20">
+        <div class="grid min-h-20 w-full grid-cols-[auto_minmax(0,1fr)_auto] items-center gap-3 transition duration-300 [.is-searching_&]:pointer-events-none [.is-searching_&]:invisible [.is-searching_&]:-translate-y-2 [.is-searching_&]:scale-[.98] [.is-searching_&]:opacity-0" data-header-content>
+            <button class="c-icon-btn c-header-action lg:hidden" type="button" aria-expanded="false" aria-controls="mobile-navigation" data-icon data-mobile-menu-toggle>
+    <span class="sr-only">فتح أو إغلاق القائمة</span>
+    <svg class="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+</button>
+            <a class="flex min-w-0 shrink-0 items-center justify-self-center gap-2.5 text-[var(--c-header-text)] lg:justify-self-auto"
+    href="https://www.getcima.net/" rel="home" aria-label="جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين">
+            <img class="h-11 w-11 shrink-0 object-contain" src="https://www.getcima.net/wp-content/themes/getcinema/public/images/branding/cinema-logo.png" alt=""
+            width="44" height="44" aria-hidden="true" loading="eager" fetchpriority="high" decoding="async">
+        <span
+            class="max-w-[170px] truncate text-xl font-black tracking-tight sm:max-w-[240px] sm:text-2xl">جيت سيما</span>
+    </a>
+            <div class="ms-auto flex items-center gap-2">
+    
+            <button class="c-icon-btn c-header-action" type="button" data-icon data-theme-toggle aria-label="تبديل نمط الألوان" aria-pressed="false">
+            <svg class="h-[19px] w-[19px] [html[data-theme=light]_&]:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><circle cx="12" cy="12" r="4"/><path d="M12 2v2m0 16v2M4.93 4.93l1.42 1.42m11.3 11.3 1.42 1.42M2 12h2m16 0h2M4.93 19.07l1.42-1.42m11.3-11.3 1.42-1.42"/></svg>
+            <svg class="h-[19px] w-[19px] [html[data-theme=dark]_&]:hidden" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="M20.5 14.2A8.5 8.5 0 0 1 9.8 3.5 8.5 8.5 0 1 0 20.5 14.2Z"/></svg>
+        </button>
+    
+    <button class="c-icon-btn c-header-action" type="button" aria-label="البحث في الفهرس" aria-expanded="false" aria-controls="header-search" data-icon data-search-toggle>
+        <svg class="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/>
+            </svg>
+    </button>
+
+    <div class="relative hidden lg:block" data-header-menu>
+        <button class="c-icon-btn c-header-action" type="button" aria-label="فتح أو إغلاق القائمة" aria-expanded="false" aria-controls="header-menu-panel" data-icon data-header-menu-toggle>
+            <svg class="h-[19px] w-[19px]" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M4 7h16M4 12h16M4 17h16"/>
+            </svg>
+        </button>
+
+        <nav id="header-menu-panel" class="c-menu invisible absolute end-0 top-full z-50 mt-3 w-64 translate-y-[-8px] rounded-xl border border-[var(--c-border)] bg-[var(--c-surface)] p-2 opacity-0 shadow-2xl transition duration-200 [&.is-open]:visible [&.is-open]:translate-y-0 [&.is-open]:opacity-100" aria-label="التنقل الأساسي" aria-hidden="true" data-header-menu-panel>
+            <ul id="c-primary-menu-dropdown" class="c-nav__list flex flex-col gap-0.5"><li id="menu-item-44" class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3zM8 22h8"/></svg></span><span class="c-nav__label">الأفلام</span></a></li>
+<li id="menu-item-45" class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=series" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 2l4 4 4-4"/></svg></span><span class="c-nav__label">المسلسلات</span></a></li>
+<li id="menu-item-46" class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=anime_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><span class="c-nav__label">الأنمي</span></a></li>
+<li id="menu-item-47" class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=wrestling_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l12 12M18 3L6 15M4 17l3 3M20 17l-3 3"/></svg></span><span class="c-nav__label">المصارعة</span></a></li>
+</ul>
+        </nav>
+    </div>
+</div>
+        </div>
+
+        <div id="header-search" class="invisible absolute inset-0 flex translate-y-2 scale-[.98] items-center opacity-0 transition duration-300 [&.is-open]:visible [&.is-open]:translate-y-0 [&.is-open]:scale-100 [&.is-open]:opacity-100" role="dialog" aria-modal="true" aria-label="البحث في الفهرس" aria-hidden="true" data-header-search>
+    <form class="relative flex h-14 w-full items-center rounded-2xl border border-[var(--c-border)] bg-[var(--c-surface)] p-1.5 shadow-lg transition focus-within:border-[var(--c-accent-tint-65)] focus-within:shadow-[0_10px_35px_var(--c-accent-tint-15),0_0_0_3px_var(--c-accent-tint-15)]" role="search" method="get" action="https://www.getcima.net/">
+        <span class="pointer-events-none ms-3 flex shrink-0 items-center justify-center text-[var(--c-accent)]" aria-hidden="true">
+            <svg class="h-6 w-6" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/>
+            </svg>
+        </span>
+        <label class="sr-only" for="header-search-input">البحث في الفهرس</label>
+        <input id="header-search-input" class="h-full min-w-0 flex-1 border-0 bg-transparent px-4 text-lg font-semibold text-[var(--c-text)] outline-none placeholder:text-[var(--c-muted)]" type="search" name="s" value="" placeholder="البحث في الفهرس" autocomplete="off" data-search-input>
+        <button class="flex h-11 shrink-0 items-center gap-2 rounded-xl bg-[linear-gradient(135deg,var(--c-accent),var(--c-accent-hover))] px-5 text-sm font-black text-[var(--c-on-accent)] shadow-[0_8px_20px_var(--c-accent-tint-25)] transition hover:-translate-y-0.5 hover:shadow-[0_12px_25px_var(--c-accent-tint-35)]" type="submit">
+            <span>بحث</span>
+            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <circle cx="11" cy="11" r="7"/><path d="m20 20-3.7-3.7"/>
+            </svg>
+        </button>
+        <button class="c-icon-btn c-icon-btn--plain ms-1" type="button" aria-label="إغلاق البحث" data-search-close>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+    </form>
+</div>
+    </div>
+</header>
+
+<button type="button" class="c-overlay fixed inset-0 hidden cursor-default border-0 bg-slate-950/55 p-0 opacity-0 backdrop-blur-[2px] transition-opacity [&.is-open]:block [&.is-open]:opacity-100" aria-label="إغلاق القائمة" tabindex="-1" data-mobile-menu-overlay></button>
+
+<aside id="mobile-navigation" class="c-drawer invisible fixed bottom-0 top-0 w-[min(360px,88vw)] overflow-y-auto border-e border-[var(--c-border)] bg-[var(--c-surface)] p-4 shadow-2xl transition-transform duration-300 ease-out start-0 -translate-x-[105%] rtl:translate-x-[105%] [&.is-open]:visible [&.is-open]:translate-x-0" aria-label="التنقل الأساسي" aria-hidden="true" inert data-mobile-nav>
+    <div class="mb-4 flex items-center justify-between border-b border-[var(--c-border)] pb-4 text-[var(--c-text)]">
+        <strong class="text-lg font-black">القائمة</strong>
+        <button type="button" class="c-icon-btn c-icon-btn--plain" aria-label="إغلاق القائمة" data-mobile-menu-close>
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><path d="m6 6 12 12M18 6 6 18"/></svg>
+        </button>
+    </div>
+    <nav aria-label="قائمة التنقل على الهاتف">
+        <ul id="c-primary-menu-mobile" class="c-nav__list flex flex-col gap-1"><li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3zM8 22h8"/></svg></span><span class="c-nav__label">الأفلام</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=series" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 2l4 4 4-4"/></svg></span><span class="c-nav__label">المسلسلات</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=anime_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><span class="c-nav__label">الأنمي</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=wrestling_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l12 12M18 3L6 15M4 17l3 3M20 17l-3 3"/></svg></span><span class="c-nav__label">المصارعة</span></a></li>
+</ul>
+    </nav>
+</aside>
+        <main id="main" class="min-h-0 flex-1" tabindex="-1">
+                            <article>
+    <header
+    class="relative overflow-hidden bg-[#070a11] after:absolute after:inset-x-0 after:bottom-0 after:z-[1]  after:bg-[linear-gradient(0deg,var(--c-bg),transparent)] after:content-['']"
+    data-title-hero>
+    
+            <img width="1600" height="900" src="https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-1600x900.jpg" class="absolute inset-0 z-0 h-full w-full scale-[1.015] object-cover object-[center_top] md:object-center brightness-50 saturate-[1.02]" alt="" aria-hidden="true" loading="eager" fetchpriority="high" decoding="async" sizes="100vw" srcset="https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-1600x900.jpg 1600w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-300x169.jpg 300w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-1024x576.jpg 1024w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-768x432.jpg 768w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-1536x864.jpg 1536w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-2048x1152.jpg 2048w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeezn7-stv8ae-350x197.jpg 350w" />
+        <div class="c-shell relative grid-cols-1 z-10 grid min-h-[80svh] md:min-h-[calc(580px+var(--c-header-h))]  items-end w-full min-w-0 gap-5 pb-10 pt-[calc(6rem+var(--c-header-h))]   md:grid-cols-[200px_minmax(0,1fr)] md:gap-8 md:pb-14 md:pt-[calc(6.5rem+var(--c-header-h))] lg:grid-cols-[240px_minmax(0,1fr)] lg:gap-10 xl:grid-cols-[260px_minmax(0,1fr)]"
+        data-title-inner>
+        
+        <div
+            class="c-title-poster hidden md:block relative z-20 isolate aspect-[2/3] w-full overflow-hidden rounded-xl border border-white/30 bg-slate-900 shadow-[0_28px_70px_rgba(0,0,0,.56),0_0_0_1px_rgba(255,255,255,.12),0_0_42px_rgba(255,255,255,.08)] after:pointer-events-none after:absolute after:inset-0 after:rounded-[inherit] after:shadow-[inset_0_1px_rgba(255,255,255,.14)] after:content-[''] md:rounded-2xl">
+            <img width="342" height="513" src="https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeexg0-4904yq.jpg" class="c-card__image c-media__img c-media__img--contain wp-post-image" alt="The Gentlemen" loading="eager" decoding="async" sizes="(min-width: 1280px) 260px, (min-width: 1024px) 240px, (min-width: 768px) 200px, (min-width: 640px) 160px, 128px" fetchpriority="auto" srcset="https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeexg0-4904yq.jpg 342w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeexg0-4904yq-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/10/iptv-poster-mvbeexg0-4904yq-233x350.jpg 233w" />
+        </div>
+        <div class="min-w-0 w-full">
+            
+            
+            <h1 class="text-page c-title-hero__title mt-3 md:max-w-4xl text-start [text-wrap:balance] sm:mt-4">
+                The Gentlemen
+            </h1>
+            <div
+                class="c-title-hero__meta mt-4 flex flex-wrap items-center gap-x-4 gap-y-2 text-sm font-bold sm:mt-5 [&>span+span]:before:me-4 [&>span+span]:before:opacity-40 [&>span+span]:before:content-['•']">
+                                                                    <span>2 مواسم</span>
+                                                    <span>16 حلقات</span>
+                                                                    <span class="c-rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5 shrink-0 sm:h-4 sm:w-4" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>8.0</bdi>
+                    </span>
+                                            </div>
+                            <p class="c-title-hero__summary mt-5 max-w-2xl text-sm leading-7 sm:text-base md:text-lg md:leading-8">
+                    عندما يرث &quot;إيدي&quot; الأرستقراطي ملكية العائلة، يكتشف أنها موطن لإمبراطورية الأعشاب الضارة الهائلة - ولن يذهب أصحابها إلى أي مكان.</p>
+                        
+                            <div class="mt-5 flex flex-wrap gap-2">
+                                            <a class="c-chip c-chip--glass c-chip--pill text-slate-200 transition hover:border-white/40 hover:bg-white/10 hover:text-white"  href="https://www.getcima.net/search/?genre=%d8%a3%d9%83%d8%b4%d9%86-%d9%88%d9%85%d8%ba%d8%a7%d9%85%d8%b1%d8%a9" >أكشن ومغامرة</a>
+                                            <a class="c-chip c-chip--glass c-chip--pill text-slate-200 transition hover:border-white/40 hover:bg-white/10 hover:text-white"  href="https://www.getcima.net/search/?genre=%d8%ac%d8%b1%d9%8a%d9%85%d8%a9" >جريمة</a>
+                                            <a class="c-chip c-chip--glass c-chip--pill text-slate-200 transition hover:border-white/40 hover:bg-white/10 hover:text-white"  href="https://www.getcima.net/search/?genre=%d8%af%d8%b1%d8%a7%d9%85%d8%a7" >دراما</a>
+                                            <a class="c-chip c-chip--glass c-chip--pill text-slate-200 transition hover:border-white/40 hover:bg-white/10 hover:text-white"  href="https://www.getcima.net/search/?genre=%d9%83%d9%88%d9%85%d9%8a%d8%af%d9%8a" >كوميدي</a>
+                                    </div>
+                        
+            <div class="mt-6 flex flex-wrap gap-3 sm:mt-8">
+                                    <a
+                    href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-refined-aggression/"
+                                                        class="c-btn c-btn--primary gap-3 overflow-hidden rounded-2xl"
+    ><span class="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/20"
+                            aria-hidden="true">
+                            <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                        </span><span>شاهد الآن</span></a>
+                                                    <a
+                    href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-refined-aggression/?type=download#download-options"
+                                                        class="c-btn c-btn--hero-muted "
+    ><svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M12 3v10"/><path d="m8 10 4 4 4-4"/><path d="M5 19h14"/>
+            </svg>
+                        <span>تحميل</span></a>
+                                            </div>
+        </div>
+    </div>
+</header>
+
+    <div class="c-shell py-8 md:py-12">
+                
+                    <section class="mt-14" aria-labelledby="content-tabs-heading" data-content-tabs>
+                <span class="text-kicker uppercase text-[var(--c-accent-text)]">تفاصيل العنوان</span>
+                <h2 id="content-tabs-heading" class="sr-only">تفاصيل العنوان</h2>
+
+                
+                <div class="mt-4 border-b border-[var(--c-border)]">
+                    <div class="flex gap-1 overflow-x-auto scrollbar-none -mb-px" role="tablist" aria-label="تفاصيل العنوان">
+                                                                                <button
+                                id="tab-cast"
+                                type="button"
+                                role="tab"
+                                aria-selected="true"
+                                aria-controls="panel-cast"
+                                data-content-tab="cast"
+                                tabindex="0"
+                                class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--c-bg)] is-active border-[var(--c-accent)] text-[var(--c-accent)] bg-[var(--c-surface)]"
+                            >
+                                <span>طاقم التمثيل</span>
+                                                                    <span class="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[var(--c-surface-soft)] px-1.5 text-xs font-black leading-none text-[var(--c-muted)]">1</span>
+                                                            </button>
+                                                                                <button
+                                id="tab-crew"
+                                type="button"
+                                role="tab"
+                                aria-selected="false"
+                                aria-controls="panel-crew"
+                                data-content-tab="crew"
+                                tabindex="-1"
+                                class="inline-flex shrink-0 items-center gap-2 whitespace-nowrap border-b-2 px-4 py-3 text-sm font-black transition focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--c-bg)] border-transparent text-[var(--c-muted)] hover:text-[var(--c-text)]"
+                            >
+                                <span>طاقم العمل</span>
+                                                                    <span class="inline-flex min-h-5 min-w-5 items-center justify-center rounded-full bg-[var(--c-surface-soft)] px-1.5 text-xs font-black leading-none text-[var(--c-muted)]">1</span>
+                                                            </button>
+                                            </div>
+                </div>
+
+                
+                <div class="mt-6">
+                    
+                                            <div
+                            id="panel-cast"
+                            role="tabpanel"
+                            aria-labelledby="tab-cast"
+                            data-content-panel="cast"
+                             aria-hidden="false"                             tabindex="0"
+                            class="outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2"
+                        >
+                            <section  aria-labelledby="credits-heading-cast" >
+            <h2 id="credits-heading-cast" class="sr-only">طاقم التمثيل</h2>
+    
+                    <div class=" flex flex-wrap justify-start gap-6 md:gap-8 lg:gap-10">
+                                            <a  href="https://www.getcima.net/cast/%d8%ab%d9%8a%d9%88-%d8%ac%d9%8a%d9%85%d8%b3%d8%8c-%d9%83%d8%a7%d9%8a%d8%a7-%d8%b3%d9%83%d9%88%d8%af%d9%8a%d9%84%d8%a7%d8%b1%d9%8a%d9%88%d8%8c-%d8%af%d8%a7%d9%86%d9%8a%d9%8a%d9%84-%d8%a5%d9%86%d8%ac/"  class="group flex w-[90px] flex-col items-center text-center sm:w-[100px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--c-bg)] rounded-2xl">
+                    <div class="relative flex h-[78px] w-[78px] items-center justify-center overflow-hidden rounded-full bg-[var(--c-surface-soft)] ring-1 ring-[var(--c-border)] transition duration-200 group-hover:ring-[var(--c-accent)] group-focus-visible:ring-[var(--c-accent)] sm:h-[84px] sm:w-[84px]">
+                                                    <span class="flex h-full w-full items-center justify-center bg-[#1a1f2b] text-[var(--c-muted)]" aria-hidden="true">
+                                <svg class="h-8 w-8 opacity-70" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+                            </span>
+                                            </div>
+                    <strong class="mt-3 line-clamp-2 max-w-full text-[13px] font-bold leading-tight text-[var(--c-text)] group-hover:text-[var(--c-accent)]">ثيو جيمس، كايا سكوديلاريو، دانييل إنجز، جولي ريتشاردسون، فيني جونز</strong>
+                                            <span class="mt-1 block text-[11px] font-bold leading-none text-[var(--c-accent)]">ممثل</span>
+                                    </a>
+                    </div>
+    
+    </section>
+                        </div>
+                    
+                                            <div
+                            id="panel-crew"
+                            role="tabpanel"
+                            aria-labelledby="tab-crew"
+                            data-content-panel="crew"
+                             hidden aria-hidden="true"                             tabindex="0"
+                            class="outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2"
+                        >
+                            <section  aria-labelledby="credits-heading-crew" >
+            <h2 id="credits-heading-crew" class="sr-only">طاقم العمل</h2>
+    
+    
+                    <div class=" flex flex-wrap justify-start gap-6 md:gap-8 lg:gap-10">
+                                            <div  class="group flex w-[90px] flex-col items-center text-center sm:w-[100px] focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-[var(--c-accent)] focus-visible:ring-offset-2 focus-visible:ring-offset-[var(--c-bg)] rounded-2xl">
+                    <div class="relative flex h-[78px] w-[78px] items-center justify-center overflow-hidden rounded-full bg-[var(--c-surface-soft)] ring-1 ring-[var(--c-border)] transition duration-200 group-hover:ring-[var(--c-accent)] sm:h-[84px] sm:w-[84px]">
+                                                    <span class="flex h-full w-full items-center justify-center bg-[#1a1f2b] text-[var(--c-muted)]" aria-hidden="true">
+                                <svg class="h-8 w-8 opacity-70" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M12 12c2.21 0 4-1.79 4-4S14.21 4 12 4 8 5.79 8 8s1.79 4 4 4zm0 2c-2.67 0-8 1.34-8 4v2h16v-2c0-2.66-5.33-4-8-4z"/>
+            </svg>
+                            </span>
+                                            </div>
+                    <strong class="mt-3 line-clamp-2 max-w-full text-[13px] font-bold leading-tight text-[var(--c-text)] group-hover:text-[var(--c-accent)]">غي ريتشي</strong>
+                    <span class="mt-1 block max-w-full truncate text-[11px] font-bold leading-none text-[var(--c-accent)]">Director · Directing</span>
+                </div>
+                    </div>
+    </section>
+                        </div>
+                    
+                                    </div>
+
+                <noscript>
+                    <style>[data-content-tabs] [data-content-panel][hidden]{display:block}</style>
+                </noscript>
+            </section>
+        
+        <section class="mt-14" aria-labelledby="episodes-heading">
+        <div class="flex flex-wrap items-end justify-between gap-3">
+            <div><span class="text-kicker uppercase text-[var(--c-accent-text)]">يعرض الآن</span>
+                <h2  id="episodes-heading"  class="c-section-title text-section mt-2">حلقات</h2>
+            </div><span
+                class="c-count">16</span>
+        </div>
+        <div class="mt-6" data-episode-browser>
+    <div class="mb-4 flex flex-wrap items-center justify-between gap-3">
+                    <nav class="flex max-w-full gap-2 overflow-x-auto pb-1" aria-label="مواسم">
+                                    <a class="c-btn shrink-0 c-btn--primary" href="https://www.getcima.net/series/the-gentlemen/?season=1"  aria-current="page" >
+                        الموسم 1 <span aria-hidden="true">(8)</span>
+                    </a>
+                                    <a class="c-btn shrink-0 c-btn--soft" href="https://www.getcima.net/series/the-gentlemen/?season=2" >
+                        الموسم 2 <span aria-hidden="true">(8)</span>
+                    </a>
+                            </nav>
+        
+        <label class="relative w-full sm:ms-auto sm:w-64">
+            <span class="sr-only">بحث</span>
+            <input class="c-field h-11 px-4 pe-10" type="search" placeholder="بحث" data-episode-search>
+        </label>
+    </div>
+
+            <section class="overflow-hidden rounded-xl border border-[var(--c-border)] bg-[var(--c-bg)]" data-season-group="1">
+                            <header class="flex items-center gap-3 border-b border-[var(--c-border)] bg-[var(--c-surface-soft)] p-3">
+                                        <div class="min-w-0 flex-1"><h3 class="m-0 text-base font-black text-[var(--c-text)]">Season 1</h3><span class="text-xs font-bold text-[var(--c-muted)]">8 حلقات</span></div>
+                </header>
+                        <div class="grid gap-2 p-3">
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <a class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-text)] sm:gap-3" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-refined-aggression/" >                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">1</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 1</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 Refined Aggression</small>
+        </span>
+                    </a>            <a class="c-download grid h-10 w-10 shrink-0 place-items-center rounded-lg shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--c-success)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)]" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-refined-aggression/?type=download#download-options" aria-label="StreamRuby">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M12 3v10"/><path d="m8 10 4 4 4-4"/><path d="M5 19h14"/>
+            </svg>
+        </a>
+    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <a class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-text)] sm:gap-3" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-tackle-tommy-woo-woo/" >                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">2</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 2</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 Tackle Tommy Woo Woo</small>
+        </span>
+                    </a>            <a class="c-download grid h-10 w-10 shrink-0 place-items-center rounded-lg shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--c-success)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)]" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-tackle-tommy-woo-woo/?type=download#download-options" aria-label="StreamRuby">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M12 3v10"/><path d="m8 10 4 4 4-4"/><path d="M5 19h14"/>
+            </svg>
+        </a>
+    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <a class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-text)] sm:gap-3" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-wheres-my-weed-at/" >                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">3</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 3</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 Where&#039;s My Weed At?</small>
+        </span>
+                    </a>            <a class="c-download grid h-10 w-10 shrink-0 place-items-center rounded-lg shadow-sm transition hover:-translate-y-0.5 hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-[var(--c-success)] focus:ring-offset-2 focus:ring-offset-[var(--c-bg)]" href="https://www.getcima.net/series/the-gentlemen/season-1/the-gentlemen-s01-wheres-my-weed-at/?type=download#download-options" aria-label="StreamRuby">
+            <svg class="h-5 w-5" viewBox="0 0 24 24" fill="none"  stroke="currentColor" stroke-width="2.1" stroke-linecap="round" stroke-linejoin="round"  aria-hidden="true" focusable="false">
+                <path d="M12 3v10"/><path d="m8 10 4 4 4-4"/><path d="M5 19h14"/>
+            </svg>
+        </a>
+    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <div class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-muted)] sm:gap-3" aria-disabled="true">                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">4</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 4</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 An Unsympathetic Gentleman</small>
+        </span>
+                    </div>    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <div class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-muted)] sm:gap-3" aria-disabled="true">                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">5</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 5</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 I&#039;ve Hundreds Of Cousins</small>
+        </span>
+                    </div>    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <div class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-muted)] sm:gap-3" aria-disabled="true">                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">6</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 6</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 All Eventualities</small>
+        </span>
+                    </div>    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <div class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-muted)] sm:gap-3" aria-disabled="true">                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">7</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 7</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 Not Without Danger</small>
+        </span>
+                    </div>    </article>
+                                    <article class="group flex min-h-20 items-center gap-2.5 rounded-lg border border-[var(--c-border)] bg-[var(--c-surface)] p-2.5 transition hover:border-[var(--c-accent)] hover:bg-[var(--c-surface-soft)] sm:gap-3 sm:p-3 " data-episode-row data-season="1">
+    <div class="flex min-w-0 flex-1 items-center gap-2.5 text-[var(--c-muted)] sm:gap-3" aria-disabled="true">                            <span class="grid h-12 w-12 shrink-0 place-items-center rounded-lg bg-[var(--c-surface-soft)] text-sm font-black text-[var(--c-accent)] group-hover:bg-[var(--c-accent)] group-hover:text-[var(--c-on-accent)]">8</span>
+                <span class="min-w-0 flex-1">
+            <strong class="block truncate text-sm font-black">الحلقة 8</strong>
+            <small class="mt-1 block truncate text-xs text-[var(--c-muted)]">The Gentlemen S01 The Gospel According To Bobby Glass</small>
+        </span>
+                    </div>    </article>
+                            </div>
+        </section>
+    
+    </div>
+    </section>
+        <section class="mt-14" aria-labelledby="related-heading">
+        <span class="text-kicker uppercase text-[var(--c-accent-text)]">اكتشف المزيد</span>
+        <h2  id="related-heading"  class="c-section-title text-section mt-2">قد يعجبك أيضًا</h2>
+        <div class="c-grid mt-6 grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 xl:grid-cols-6">
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/house-of-the-dragon_sub/" aria-label="House of the Dragon_sub ()">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="154" height="231" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="House of the Dragon_sub" loading="lazy" decoding="async" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj6oke7-rz9e9y.jpg" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    7.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/house-of-the-dragon_sub/"
+            aria-label="عرض House of the Dragon_sub ()">
+            <img width="154" height="231" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="House of the Dragon_sub" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj6oke7-rz9e9y.jpg" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">House of the Dragon_sub ()</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>7.0</bdi>
+                    </span>
+                                                                    <span>60 دقيقة</span>
+                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    The prequel series finds the Targaryen dynasty at the absolute apex of its power, with more than 15&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/house-of-the-dragon_sub/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/lucky-%d9%85%d8%aa%d8%b1%d8%ac%d9%85/" aria-label="Lucky &#8211; مترجم ()">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="500" height="750" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="Lucky - مترجم" loading="lazy" decoding="async" sizes="auto, (max-width: 500px) 100vw, 500px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-500x750.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-233x350.jpg 233w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o.jpg 600w" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    6.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/lucky-%d9%85%d8%aa%d8%b1%d8%ac%d9%85/"
+            aria-label="عرض Lucky &#8211; مترجم ()">
+            <img width="600" height="900" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="Lucky - مترجم" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o.jpg 600w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muj5lp31-nemr1o-233x350.jpg 233w" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">Lucky &#8211; مترجم ()</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>6.0</bdi>
+                    </span>
+                                                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    When a multi-million-dollar heist goes sideways, con artist Lucky is forced to go on the run. Pursued by&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/lucky-%d9%85%d8%aa%d8%b1%d8%ac%d9%85/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/my-brilliant-career-2026-2026/" aria-label="My Brilliant Career (2026) (2026)">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="500" height="750" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="My Brilliant Career (2026)" loading="lazy" decoding="async" sizes="auto, (max-width: 500px) 100vw, 500px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-500x750.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-233x350.jpg 233w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv.jpg 600w" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    4.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/my-brilliant-career-2026-2026/"
+            aria-label="عرض My Brilliant Career (2026) (2026)">
+            <img width="600" height="900" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="My Brilliant Career (2026)" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv.jpg 600w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muixxdad-yff8nv-233x350.jpg 233w" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">My Brilliant Career (2026) (2026)</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>4.0</bdi>
+                    </span>
+                                                    <span>2026</span>
+                                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    Restless, razor-sharp, and refusing to conform, Sybylla is dead set on writing her own story in an era&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/my-brilliant-career-2026-2026/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/%d9%81%d9%8a-%d8%a7%d9%84%d8%b3%d8%a7%d8%a8%d8%b9%d8%a9-%d8%b9%d8%b4%d8%b1%d8%a9-2026-2026/" aria-label="في السابعة عشرة (2026) (2026)">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="500" height="750" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="في السابعة عشرة (2026)" loading="lazy" decoding="async" sizes="auto, (max-width: 500px) 100vw, 500px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-500x750.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-233x350.jpg 233w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92.jpg 599w" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    6.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/%d9%81%d9%8a-%d8%a7%d9%84%d8%b3%d8%a7%d8%a8%d8%b9%d8%a9-%d8%b9%d8%b4%d8%b1%d8%a9-2026-2026/"
+            aria-label="عرض في السابعة عشرة (2026) (2026)">
+            <img width="599" height="900" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="في السابعة عشرة (2026)" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92.jpg 599w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-500x750.jpg 500w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-muhe8qyt-4ygl92-233x350.jpg 233w" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">في السابعة عشرة (2026) (2026)</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>6.0</bdi>
+                    </span>
+                                                    <span>2026</span>
+                                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    After losing his family as a child, Aras comes to Bodrum searching for his missing brother. But his&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/%d9%81%d9%8a-%d8%a7%d9%84%d8%b3%d8%a7%d8%a8%d8%b9%d8%a9-%d8%b9%d8%b4%d8%b1%d8%a9-2026-2026/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/silo/" aria-label="Silo ()">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="342" height="513" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="Silo" loading="lazy" decoding="async" sizes="auto, (max-width: 342px) 100vw, 342px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td.jpg 342w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td-233x350.jpg 233w" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    8.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/silo/"
+            aria-label="عرض Silo ()">
+            <img width="342" height="513" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="Silo" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td.jpg 342w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mua5noht-0by3td-233x350.jpg 233w" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">Silo ()</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>8.0</bdi>
+                    </span>
+                                                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    في مستقبل خرب وسامّ، يعيش آلاف الناس في صومعة ضخمة تحت الأرض. بعد أن يخرق مأمورهم قانونها الأساسي&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/silo/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                            <article class="c-card c-card--poster group overflow-hidden rounded-xl hover:-translate-y-1"
+     data-card-preview-source >
+    <a class="c-card__link block" href="https://www.getcima.net/series/stranger-things/" aria-label="Stranger Things ()">
+        <div class="c-card__media relative aspect-[2/3] overflow-hidden">
+            <div class="absolute inset-0 bg-slate-800">
+                <img width="342" height="513" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--cover c-media__img--zoom lazy wp-post-image" alt="Stranger Things ()" loading="lazy" decoding="async" sizes="auto, (max-width: 342px) 100vw, 342px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on.jpg 342w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on-233x350.jpg 233w" />
+            </div>
+            <div class="absolute inset-0 bg-[linear-gradient(180deg,rgba(2,6,23,.02)_35%,rgba(2,6,23,.92)_100%)]"></div>
+                            <span class="c-chip c-chip--rating  c-card__rating absolute end-3 top-3"><svg class="h-3 w-3" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                    9.0</span>
+                        <span class="c-chip c-chip--accent c-chip--compact c-card__type absolute start-3 top-3 uppercase tracking-wider shadow-[0_6px_18px_rgba(0,0,0,.25)]">مسلسل</span>
+            <span
+                class="c-card__play absolute left-1/2 top-1/2 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 scale-75 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] opacity-0 shadow-xl transition group-hover:scale-100 group-hover:opacity-100"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+            <div class="c-card__body absolute inset-x-0 bottom-0 z-10 p-4">
+                
+                
+            </div>
+        </div>
+    </a>
+            <template data-card-preview-template>
+    <article class="c-preview" data-state="hidden" aria-hidden="true"
+        dir="rtl">
+        <a class="c-preview__media relative block max-h-[240px] overflow-hidden bg-slate-900 after:absolute after:inset-0 after:bg-[linear-gradient(180deg,transparent_50%,rgba(0,0,0,.86))] after:content-[''] [&_.c-media__img]:!h-auto [&_.c-media__img]:max-h-[240px] [&_.c-media__img]:w-full [&_.c-media__img]:object-contain"
+            href="https://www.getcima.net/series/stranger-things/"
+            aria-label="عرض Stranger Things ()">
+            <img width="342" height="513" src="data:image/gif;base64,R0lGODlhAQABAAD/ACwAAAAAAQABAAACADs=" class="c-card__image c-media__img c-media__img--contain c-media__img--zoom lazy wp-post-image" alt="Stranger Things ()" loading="lazy" decoding="async" sizes="auto, (max-width: 383px) calc(100vw - 24px), 368px" data-src="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on.jpg" data-srcset="https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on.jpg 342w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on-200x300.jpg 200w, https://www.getcima.net/wp-content/uploads/2026/09/iptv-poster-mu4thlbp-tpg5on-233x350.jpg 233w" />
+            <span
+                class="absolute left-1/2 top-1/2 z-10 flex h-12 w-12 -translate-x-1/2 -translate-y-1/2 items-center justify-center rounded-full bg-[var(--c-accent)] text-[var(--c-on-accent)] shadow-xl"
+                aria-hidden="true"><svg class="h-6 w-6" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+</span>
+        </a>
+        <div class="p-4">
+            <h3 class="c-preview__title line-clamp-2 leading-snug">Stranger Things ()</h3>
+            <div class="c-preview__meta mt-2 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs">
+                <span>مسلسل</span>
+                                    <span class="c-card__rating inline-flex items-center gap-1">
+                        <svg class="h-3.5 w-3.5" viewBox="0 0 20 20" fill="currentColor" aria-hidden="true"><path d="M10 1.5l2.6 5.27 5.82.85-4.21 4.1.99 5.79L10 14.9l-5.2 2.61.99-5.79-4.21-4.1 5.82-.85L10 1.5z"/></svg>
+                        <bdi>9.0</bdi>
+                    </span>
+                                                            </div>
+                            <p class="c-preview__meta mt-3 line-clamp-2 text-sm leading-6">
+                    عقب اختفاء صبي من بلدة صغيرة، يكشف أهل البلدة عن لغز ينطوي على تجارب سريّة وقوًى مرعبة خارقة&hellip;
+                </p>
+                        <a
+                    href="https://www.getcima.net/series/stranger-things/"
+                                                        class="c-btn c-btn--light mt-4 w-full"
+    ><svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor"  aria-hidden="true" focusable="false">
+                <path d="M8 5v14l11-7z"/>
+            </svg>
+                <span>شاهد الآن</span></a>
+        </div>
+    </article>
+</template>
+    </article>
+                    </div>
+    </section>
+    </div>
+</article>
+        </main>
+        <footer class="c-footer">
+    
+    <div class="c-shell py-8 text-sm">
+                <div class="flex flex-col gap-8 md:flex-row md:items-start md:justify-between">
+            <div>
+                <a class="c-footer__title text-2xl font-black tracking-tight" href="https://www.getcima.net/">جيت سيما</a>
+                <p class="mt-3 max-w-sm leading-7">جيت سيما Get Cima منصة لمشاهدة أحدث الأفلام والمسلسلات العربية والأجنبية والتركية المترجمة أون لاين بجودة عالية، مع مكتبة متجددة وأقسام متنوعة لعشاق السينما والمسلسلات.</p>                                    <div class="flex flex-wrap items-center gap-2 mt-5 shrink-0" aria-label="وسائل التواصل الاجتماعي">
+                                                <span class="c-icon-btn cursor-default text-[var(--c-muted)] opacity-70" role="img" aria-label="فيسبوك" data-social>
+                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M13.5 22v-8h2.8l.4-3.2h-3.2v-2c0-.9.3-1.6 1.7-1.6H17V4.3c-.8-.1-1.6-.2-2.4-.2-2.4 0-4.1 1.5-4.1 4.3v2.4H7.8V14h2.7v8h3Z"/></svg>
+                </span>
+                                                            <span class="c-icon-btn cursor-default text-[var(--c-muted)] opacity-70" role="img" aria-label="إكس (تويتر)" data-social>
+                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M18.3 2H22l-8.1 9.2L23.4 22H16l-5.8-7.6L3.6 22H0l8.5-9.8L-.6 2H7l5.2 6.9L18.3 2Zm-1.3 18h2L5.9 3.9H3.8L17 20Z"/></svg>
+                </span>
+                                                            <span class="c-icon-btn cursor-default text-[var(--c-muted)] opacity-70" role="img" aria-label="يوتيوب" data-social>
+                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M23.5 6.2a3 3 0 0 0-2.1-2.1C19.5 3.6 12 3.6 12 3.6s-7.5 0-9.4.5A3 3 0 0 0 .5 6.2 31 31 0 0 0 0 12a31 31 0 0 0 .5 5.8 3 3 0 0 0 2.1 2.1c1.9.5 9.4.5 9.4.5s7.5 0 9.4-.5a3 3 0 0 0 2.1-2.1A31 31 0 0 0 24 12a31 31 0 0 0-.5-5.8ZM9.6 15.6V8.4l6.3 3.6-6.3 3.6Z"/></svg>
+                </span>
+                                                            <span class="c-icon-btn cursor-default text-[var(--c-muted)] opacity-70" role="img" aria-label="إنستغرام" data-social>
+                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+                </span>
+                                                            <span class="c-icon-btn cursor-default text-[var(--c-muted)] opacity-70" role="img" aria-label="تيليجرام" data-social>
+                    <svg class="h-[18px] w-[18px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m22.7 2.3-3.4 18c-.3 1.3-1 1.6-2.1 1l-5.2-3.8-2.5 2.4c-.3.3-.5.5-1 .5l.4-5.3 9.6-8.7c.4-.4-.1-.6-.6-.2L6 13.7.9 12.1c-1.2-.4-1.2-1.2.2-1.7L21 2.7c.9-.3 1.8.2 1.7-.4Z"/></svg>
+                </span>
+                        </div>
+                            </div>
+                    </div>
+                    <nav class="c-fnav mt-7 border-t border-[var(--c-border)] pt-4" aria-label="روابط التذييل">
+                <ul id="c-footer-menu" class="c-nav__list"><li id="menu-item-364" class="menu-item menu-item-type-post_type menu-item-object-page menu-item-privacy-policy c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0 block"><a href="https://www.getcima.net/privacy-policy/" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__label">سياسة الخصوصية</span></a></li>
+<li id="menu-item-365" class="menu-item menu-item-type-post_type menu-item-object-page c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0 block"><a href="https://www.getcima.net/contact-us/" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__label">أتصل بنا</span></a></li>
+<li id="menu-item-366" class="menu-item menu-item-type-post_type menu-item-object-page c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0 block"><a href="https://www.getcima.net/copyright-policy/" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__label">حقوق النشر (DMCA)</span></a></li>
+</ul>
+            </nav>
+                        <div class="mt-5 border-t border-[var(--c-border)] pt-5 flex flex-col gap-5 text-xs">
+                        <div class="flex flex-wrap items-center justify-between gap-2">
+                                    <p>&copy; 2026 جيت سيما | Get Cima | مشاهدة أفلام ومسلسلات مترجمة أون لاين. جميع الحقوق محفوظة.</p>
+                                <a class="c-footer__link inline-flex items-center gap-1.5 font-bold" href="#main">
+                    <svg class="h-4 w-4" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="m12 4-8 8h6v8h4v-8h6l-8-8Z"/></svg>
+                    <span>العودة إلى الأعلى</span>
+                </a>
+            </div>
+        </div>
+    </div>
+
+            <nav class="pointer-events-none fixed inset-x-0 bottom-0 z-50 pb-[env(safe-area-inset-bottom)] lg:hidden" aria-label="تنقل تذييل الجوال" data-mobile-footer-nav>
+    <button class="pointer-events-none fixed inset-0 z-10 border-0 bg-slate-950/70 p-0 opacity-0 backdrop-blur transition duration-200 [&.is-open]:pointer-events-auto [&.is-open]:opacity-100" type="button" aria-label="إغلاق القائمة" tabindex="-1" data-mobile-footer-more-overlay></button>
+
+    <div class="pointer-events-auto relative z-20 mx-auto flex max-w-2xl items-stretch border-t border-[var(--c-border)] bg-[var(--c-surface)] bg-[var(--c-surface-tint-96)] px-1 shadow-[0_-12px_35px_rgba(0,0,0,.2)] backdrop-blur-[18px]">
+        <ul id="c-mobile-footer-menu" class="c-mf-list flex min-w-0 flex-1 items-stretch"><li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M10 9l5 3-5 3zM8 22h8"/></svg></span><span class="c-nav__label">الأفلام</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=series" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><rect x="3" y="6" width="18" height="13" rx="2"/><path d="M8 2l4 4 4-4"/></svg></span><span class="c-nav__label">المسلسلات</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=anime_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M13 2L4 14h7l-1 8 9-12h-7z"/></svg></span><span class="c-nav__label">الأنمي</span></a></li>
+<li class="menu-item menu-item-type-custom menu-item-object-custom c-nav__item relative grid min-w-0 grid-cols-[minmax(0,1fr)_auto] items-center c-nav__item--depth-0"><a href="https://www.getcima.net/search/?content_type=wrestling_movie" class="c-nav__link flex min-w-0 items-center gap-2 rounded-xl px-4 py-3 text-sm font-bold c-nav__link--depth-0"><span class="c-nav__icon inline-flex h-5 w-5 shrink-0 items-center justify-center [&>svg]:h-[18px] [&>svg]:w-[18px]"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M6 3l12 12M18 3L6 15M4 17l3 3M20 17l-3 3"/></svg></span><span class="c-nav__label">المصارعة</span></a></li>
+</ul>
+
+        <button class="c-mf-more pointer-events-auto relative flex min-h-[68px] min-w-0 flex-1 flex-col items-center justify-center gap-1.5 rounded-lg border-0 bg-transparent px-1 py-2 text-center text-[10px] font-bold leading-none text-[var(--c-muted)] transition aria-expanded:bg-[var(--c-surface-soft)] aria-expanded:text-[var(--c-text)]" type="button" aria-expanded="false" aria-controls="mobile-footer-more-panel" hidden data-mobile-footer-more-toggle>
+            <svg class="h-[22px] w-[22px]" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><circle cx="5" cy="12" r="2"/><circle cx="12" cy="12" r="2"/><circle cx="19" cy="12" r="2"/></svg>
+            <span class="c-nav__label">المزيد</span>
+        </button>
+    </div>
+
+    <div id="mobile-footer-more-panel" class="pointer-events-none invisible fixed end-3 z-30 w-[min(280px,calc(100vw-24px))] translate-y-3 overflow-hidden rounded-2xl border border-[var(--c-border)] bg-[var(--c-surface)] p-2 opacity-0 shadow-2xl transition duration-200 bottom-[calc(80px+env(safe-area-inset-bottom))] max-h-[min(68vh,560px)] [&.is-open]:pointer-events-auto [&.is-open]:visible [&.is-open]:translate-y-0 [&.is-open]:opacity-100" aria-hidden="true" inert data-mobile-footer-more-panel>
+        <ul class="c-mf-over flex max-h-[inherit] flex-col gap-1 overflow-y-auto overscroll-contain" aria-label="روابط تنقل إضافية" data-mobile-footer-overflow></ul>
+    </div>
+</nav>
+    </footer>
+        <script type="speculationrules">
+{"prefetch":[{"source":"document","where":{"and":[{"href_matches":"/*"},{"not":{"href_matches":["/wp-*.php","/wp-admin/*","/wp-content/uploads/*","/wp-content/*","/wp-content/plugins/*","/wp-content/themes/getcinema/*","/*\\?(.+)"]}},{"not":{"selector_matches":"a[rel~=\"nofollow\"]"}},{"not":{"selector_matches":".no-prefetch, .no-prefetch a"}}]},"eagerness":"conservative"}]}
+</script>
+<style id="global-styles-inline-css">
+:root{--wp--preset--aspect-ratio--square: 1;--wp--preset--aspect-ratio--4-3: 4/3;--wp--preset--aspect-ratio--3-4: 3/4;--wp--preset--aspect-ratio--3-2: 3/2;--wp--preset--aspect-ratio--2-3: 2/3;--wp--preset--aspect-ratio--16-9: 16/9;--wp--preset--aspect-ratio--9-16: 9/16;--wp--preset--color--black: #000000;--wp--preset--color--cyan-bluish-gray: #abb8c3;--wp--preset--color--white: #ffffff;--wp--preset--color--pale-pink: #f78da7;--wp--preset--color--vivid-red: #cf2e2e;--wp--preset--color--luminous-vivid-orange: #ff6900;--wp--preset--color--luminous-vivid-amber: #fcb900;--wp--preset--color--light-green-cyan: #7bdcb5;--wp--preset--color--vivid-green-cyan: #00d084;--wp--preset--color--pale-cyan-blue: #8ed1fc;--wp--preset--color--vivid-cyan-blue: #0693e3;--wp--preset--color--vivid-purple: #9b51e0;--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple: linear-gradient(135deg,rgb(6,147,227) 0%,rgb(155,81,224) 100%);--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan: linear-gradient(135deg,rgb(122,220,180) 0%,rgb(0,208,130) 100%);--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange: linear-gradient(135deg,rgb(252,185,0) 0%,rgb(255,105,0) 100%);--wp--preset--gradient--luminous-vivid-orange-to-vivid-red: linear-gradient(135deg,rgb(255,105,0) 0%,rgb(207,46,46) 100%);--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray: linear-gradient(135deg,rgb(238,238,238) 0%,rgb(169,184,195) 100%);--wp--preset--gradient--cool-to-warm-spectrum: linear-gradient(135deg,rgb(74,234,220) 0%,rgb(151,120,209) 20%,rgb(207,42,186) 40%,rgb(238,44,130) 60%,rgb(251,105,98) 80%,rgb(254,248,76) 100%);--wp--preset--gradient--blush-light-purple: linear-gradient(135deg,rgb(255,206,236) 0%,rgb(152,150,240) 100%);--wp--preset--gradient--blush-bordeaux: linear-gradient(135deg,rgb(254,205,165) 0%,rgb(254,45,45) 50%,rgb(107,0,62) 100%);--wp--preset--gradient--luminous-dusk: linear-gradient(135deg,rgb(255,203,112) 0%,rgb(199,81,192) 50%,rgb(65,88,208) 100%);--wp--preset--gradient--pale-ocean: linear-gradient(135deg,rgb(255,245,203) 0%,rgb(182,227,212) 50%,rgb(51,167,181) 100%);--wp--preset--gradient--electric-grass: linear-gradient(135deg,rgb(202,248,128) 0%,rgb(113,206,126) 100%);--wp--preset--gradient--midnight: linear-gradient(135deg,rgb(2,3,129) 0%,rgb(40,116,252) 100%);--wp--preset--font-size--small: 13px;--wp--preset--font-size--medium: 20px;--wp--preset--font-size--large: 36px;--wp--preset--font-size--x-large: 42px;--wp--preset--spacing--20: 0.44rem;--wp--preset--spacing--30: 0.67rem;--wp--preset--spacing--40: 1rem;--wp--preset--spacing--50: 1.5rem;--wp--preset--spacing--60: 2.25rem;--wp--preset--spacing--70: 3.38rem;--wp--preset--spacing--80: 5.06rem;--wp--preset--shadow--natural: 6px 6px 9px rgba(0, 0, 0, 0.2);--wp--preset--shadow--deep: 12px 12px 50px rgba(0, 0, 0, 0.4);--wp--preset--shadow--sharp: 6px 6px 0px rgba(0, 0, 0, 0.2);--wp--preset--shadow--outlined: 6px 6px 0px -3px rgb(255, 255, 255), 6px 6px rgb(0, 0, 0);--wp--preset--shadow--crisp: 6px 6px 0px rgb(0, 0, 0);}.wp-block-button{--wp--preset--dimension--25: 25%;--wp--preset--dimension--50: 50%;--wp--preset--dimension--75: 75%;--wp--preset--dimension--100: 100%;}:where(body) { margin: 0; }:where(.is-layout-flex){gap: 0.5em;}:where(.is-layout-grid){gap: 0.5em;}body .is-layout-flex{display: flex;}.is-layout-flex{flex-wrap: wrap;align-items: center;}.is-layout-flex > :is(*, div){margin: 0;}body .is-layout-grid{display: grid;}.is-layout-grid > :is(*, div){margin: 0;}body{padding-top: 0px;padding-right: 0px;padding-bottom: 0px;padding-left: 0px;}:root :where(.wp-element-button, .wp-block-button__link){background-color: #32373c;border-width: 0;color: #fff;font-family: inherit;font-size: inherit;font-style: inherit;font-weight: inherit;letter-spacing: inherit;line-height: inherit;padding-top: calc(0.667em + 2px);padding-right: calc(1.333em + 2px);padding-bottom: calc(0.667em + 2px);padding-left: calc(1.333em + 2px);text-decoration: none;text-transform: inherit;}.has-black-color{color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-color{color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-color{color: var(--wp--preset--color--white) !important;}.has-pale-pink-color{color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-color{color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-color{color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-color{color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-color{color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-color{color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-color{color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-color{color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-color{color: var(--wp--preset--color--vivid-purple) !important;}.has-black-background-color{background-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-background-color{background-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-background-color{background-color: var(--wp--preset--color--white) !important;}.has-pale-pink-background-color{background-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-background-color{background-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-background-color{background-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-background-color{background-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-background-color{background-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-background-color{background-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-background-color{background-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-background-color{background-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-background-color{background-color: var(--wp--preset--color--vivid-purple) !important;}.has-black-border-color{border-color: var(--wp--preset--color--black) !important;}.has-cyan-bluish-gray-border-color{border-color: var(--wp--preset--color--cyan-bluish-gray) !important;}.has-white-border-color{border-color: var(--wp--preset--color--white) !important;}.has-pale-pink-border-color{border-color: var(--wp--preset--color--pale-pink) !important;}.has-vivid-red-border-color{border-color: var(--wp--preset--color--vivid-red) !important;}.has-luminous-vivid-orange-border-color{border-color: var(--wp--preset--color--luminous-vivid-orange) !important;}.has-luminous-vivid-amber-border-color{border-color: var(--wp--preset--color--luminous-vivid-amber) !important;}.has-light-green-cyan-border-color{border-color: var(--wp--preset--color--light-green-cyan) !important;}.has-vivid-green-cyan-border-color{border-color: var(--wp--preset--color--vivid-green-cyan) !important;}.has-pale-cyan-blue-border-color{border-color: var(--wp--preset--color--pale-cyan-blue) !important;}.has-vivid-cyan-blue-border-color{border-color: var(--wp--preset--color--vivid-cyan-blue) !important;}.has-vivid-purple-border-color{border-color: var(--wp--preset--color--vivid-purple) !important;}.has-vivid-cyan-blue-to-vivid-purple-gradient-background{background: var(--wp--preset--gradient--vivid-cyan-blue-to-vivid-purple) !important;}.has-light-green-cyan-to-vivid-green-cyan-gradient-background{background: var(--wp--preset--gradient--light-green-cyan-to-vivid-green-cyan) !important;}.has-luminous-vivid-amber-to-luminous-vivid-orange-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-amber-to-luminous-vivid-orange) !important;}.has-luminous-vivid-orange-to-vivid-red-gradient-background{background: var(--wp--preset--gradient--luminous-vivid-orange-to-vivid-red) !important;}.has-very-light-gray-to-cyan-bluish-gray-gradient-background{background: var(--wp--preset--gradient--very-light-gray-to-cyan-bluish-gray) !important;}.has-cool-to-warm-spectrum-gradient-background{background: var(--wp--preset--gradient--cool-to-warm-spectrum) !important;}.has-blush-light-purple-gradient-background{background: var(--wp--preset--gradient--blush-light-purple) !important;}.has-blush-bordeaux-gradient-background{background: var(--wp--preset--gradient--blush-bordeaux) !important;}.has-luminous-dusk-gradient-background{background: var(--wp--preset--gradient--luminous-dusk) !important;}.has-pale-ocean-gradient-background{background: var(--wp--preset--gradient--pale-ocean) !important;}.has-electric-grass-gradient-background{background: var(--wp--preset--gradient--electric-grass) !important;}.has-midnight-gradient-background{background: var(--wp--preset--gradient--midnight) !important;}.has-small-font-size{font-size: var(--wp--preset--font-size--small) !important;}.has-medium-font-size{font-size: var(--wp--preset--font-size--medium) !important;}.has-large-font-size{font-size: var(--wp--preset--font-size--large) !important;}.has-x-large-font-size{font-size: var(--wp--preset--font-size--x-large) !important;}
+/*# sourceURL=global-styles-inline-css */
+</style>
+<script id="cinema-frontend-js-extra">
+var cinemaThemeRuntime = {"ajaxUrl":"https://www.getcima.net/wp-admin/admin-ajax.php","restUrl":"https://www.getcima.net/wp-json/","locale":"ar","context":"frontend","imageLazyLoad":"1","lazyLoadUrl":"https://www.getcima.net/wp-content/themes/getcinema/public/js/lazyload.min.js?ver=1.0.22"};
+//# sourceURL=cinema-frontend-js-extra
+</script>
+<script type="module" crossorigin id="cinema-frontend-js" src="https://www.getcima.net/wp-content/themes/getcinema/dist/frontend/assets/app-a81e0a99.js"></script>
+</body>
+</html>

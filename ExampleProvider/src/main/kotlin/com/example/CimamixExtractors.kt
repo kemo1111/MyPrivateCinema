@@ -13,11 +13,11 @@ import com.lagradost.cloudstream3.utils.newExtractorLink
 /** Embed pages that put an HLS master playlist url in the page (plain or p.a.c.k.e.d). */
 object CimamixHls {
 
-    private fun unpackFallback(html: String): String? {
+    fun unpackFallback(html: String): String? {
         val header = "eval(function(p,a,c,k,e,d){"
         val start = html.indexOf(header)
         if (start < 0) return null
-        val end = html.indexOf("'.split('|'))", start)
+        val end = html.indexOf("'.split('|')", start)
         if (end < 0) return null
         val sepStart = html.lastIndexOf("',", end)
         if (sepStart < start) return null
